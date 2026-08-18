@@ -15,9 +15,13 @@ static uint32_t readU32(const uint8_t *data) {
     return static_cast<uint32_t>(data[0]) | (static_cast<uint32_t>(data[1]) << 8) | (static_cast<uint32_t>(data[2]) << 16) | (static_cast<uint32_t>(data[3]) << 24);
 }
 
-Bus::Bus() : rxHead_(0), rxTail_(0), txHead_(0), txTail_(0), transmitting_(false), running_(false), packetHandler_(nullptr), deviceHandler_(nullptr), packetContext_(nullptr), deviceContext_(nullptr), ackHandler_(nullptr), ackContext_(nullptr), selfIdentifier_(0), nextAnnounce_(0), packetCount_(0) {
+Bus::Bus() : rxHead_(0), rxTail_(0), txHead_(0), txTail_(0), transmitting_(false), running_(false), packetHandler_(nullptr), deviceHandler_(nullptr), packetContext_(nullptr), deviceContext_(nullptr), ackHandler_(nullptr), ackContext_(nullptr), deviceEventHandler_(nullptr), deviceEventContext_(nullptr), commandErrorHandler_(nullptr), commandErrorContext_(nullptr), selfIdentifier_(0), nextAnnounce_(0) {
     memset(devices_, 0, sizeof(devices_));
     memset(ackRequests_, 0, sizeof(ackRequests_));
+    memset(registerRequests_, 0, sizeof(registerRequests_));
+    memset(packetSubscriptions_, 0, sizeof(packetSubscriptions_));
+    memset(deviceSubscriptions_, 0, sizeof(deviceSubscriptions_));
+    memset(ackSubscriptions_, 0, sizeof(ackSubscriptions_));
     memset(&diagnostics_, 0, sizeof(diagnostics_));
 }
 
@@ -29,6 +33,7 @@ bool Bus::begin(uint8_t pin) {
     rxHead_ = rxTail_ = txHead_ = txTail_ = 0;
     transmitting_ = false;
     memset(ackRequests_, 0, sizeof(ackRequests_));
+    memset(registerRequests_, 0, sizeof(registerRequests_));
     memset(&diagnostics_, 0, sizeof(diagnostics_));
     running_ = Nrf52Transport::instance().begin(pin, receiveFromTransport, transmitDoneFromTransport, this);
     if (running_) {
@@ -57,6 +62,7 @@ void Bus::process() {
     }
     const uint32_t now = millis();
     processAcks(now);
+    processRegisterRequests(now);
     if (static_cast<int32_t>(now - nextAnnounce_) >= 0) {
         queueAnnounce();
         nextAnnounce_ = now + 500;
@@ -64,8 +70,9 @@ void Bus::process() {
     for (uint8_t index = 0; index < MAX_DEVICES; ++index) {
         Device &knownDevice = devices_[index];
         if (knownDevice.connected() && static_cast<uint32_t>(now - knownDevice.lastSeen) > DEVICE_TIMEOUT_MS) {
-            if (deviceHandler_ != nullptr) {
-                deviceHandler_(knownDevice, false, deviceContext_);
+            dispatchDevice(knownDevice, false);
+            if (deviceEventHandler_ != nullptr) {
+                deviceEventHandler_(knownDevice, DeviceEvent::Disconnected, deviceEventContext_);
             }
             memset(&knownDevice, 0, sizeof(knownDevice));
         }
@@ -116,11 +123,36 @@ Service Bus::findService(uint32_t serviceClass, uint8_t instance) const {
 Service Bus::service(uint64_t deviceIdentifier, uint8_t serviceIndex) const {
     for (uint8_t deviceIndex = 0; deviceIndex < MAX_DEVICES; ++deviceIndex) {
         const Device &knownDevice = devices_[deviceIndex];
-        if (knownDevice.identifier == deviceIdentifier && serviceIndex > 0 && serviceIndex <= knownDevice.serviceCount) {
-            return {deviceIdentifier, knownDevice.serviceClasses[serviceIndex - 1], serviceIndex};
+        if (knownDevice.identifier == deviceIdentifier) {
+            if (serviceIndex == SERVICE_INDEX_CONTROL) {
+                return {deviceIdentifier, service::CONTROL, SERVICE_INDEX_CONTROL};
+            }
+            if (serviceIndex <= knownDevice.serviceCount) {
+                return {deviceIdentifier, knownDevice.serviceClasses[serviceIndex - 1], serviceIndex};
+            }
         }
     }
     return {0, 0, 0};
+}
+
+Service Bus::resolve(const ServiceBinding &binding) const {
+    if (binding.bound()) {
+        const Service result = service(binding.deviceIdentifier, binding.serviceIndex);
+        return result.serviceClass == binding.serviceClass ? result : Service{0, binding.serviceClass, 0};
+    }
+    return findService(binding.serviceClass, binding.instance);
+}
+
+CommandBatch::CommandBatch(uint64_t deviceIdentifier, bool requestAck) : packetCount_(0) {
+    resetFrame(frame_, deviceIdentifier, static_cast<uint8_t>(FRAME_FLAG_COMMAND | (requestAck ? FRAME_FLAG_ACK_REQUESTED : 0)));
+}
+
+bool CommandBatch::add(const Service &target, uint16_t command, const void *data, uint8_t size) {
+    if (!target.valid() || target.deviceIdentifier != frame_.deviceIdentifier || !appendPacket(frame_, target.serviceIndex, command, data, size)) {
+        return false;
+    }
+    ++packetCount_;
+    return true;
 }
 
 bool Bus::sendCommand(const Service &target, uint16_t command, const void *data, uint8_t size, bool requestAck) {
@@ -161,6 +193,83 @@ bool Bus::setRegister(const Service &target, uint16_t reg, const void *data, uin
     return sendCommand(target, static_cast<uint16_t>(CMD_SET_REGISTER | (reg & REGISTER_CODE_MASK)), data, size, requestAck);
 }
 
+bool Bus::getRegisterAsync(const Service &target, uint16_t reg, RegisterResponseHandler handler, void *context, uint32_t timeoutMs) {
+    if (!target.valid() || handler == nullptr) {
+        return false;
+    }
+    const uint16_t serviceCommand = static_cast<uint16_t>(CMD_GET_REGISTER | (reg & REGISTER_CODE_MASK));
+    for (uint8_t index = 0; index < MAX_REGISTER_REQUESTS; ++index) {
+        const RegisterRequest &request = registerRequests_[index];
+        if (request.active && request.deviceIdentifier == target.deviceIdentifier && request.serviceIndex == target.serviceIndex && request.serviceCommand == serviceCommand) {
+            return false;
+        }
+    }
+    for (uint8_t index = 0; index < MAX_REGISTER_REQUESTS; ++index) {
+        RegisterRequest &request = registerRequests_[index];
+        if (!request.active) {
+            request = {target.deviceIdentifier, millis() + timeoutMs, handler, context, serviceCommand, target.serviceIndex, true};
+            if (!sendCommand(target, serviceCommand)) {
+                request.active = false;
+                return false;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Bus::sendMulticast(uint32_t serviceClass, uint16_t serviceCommand, const void *data, uint8_t size) {
+    if (!running_ || serviceClass == 0) {
+        return false;
+    }
+    Frame frame;
+    resetFrame(frame, serviceClass, FRAME_FLAG_COMMAND | FRAME_FLAG_IDENTIFIER_IS_SERVICE_CLASS);
+    if (!appendPacket(frame, SERVICE_INDEX_BROADCAST, serviceCommand, data, size)) {
+        return false;
+    }
+    finalizeFrame(frame);
+    return queueFrame(frame);
+}
+
+bool Bus::sendBatch(const CommandBatch &batch) {
+    if (!running_ || batch.packetCount_ == 0) {
+        return false;
+    }
+    Frame frame = batch.frame_;
+    finalizeFrame(frame);
+    int8_t ackIndex = -1;
+    if ((frame.flags & FRAME_FLAG_ACK_REQUESTED) != 0) {
+        ackIndex = trackAck(frame);
+        if (ackIndex < 0) {
+            return false;
+        }
+    }
+    if (!queueFrame(frame)) {
+        if (ackIndex >= 0) {
+            ackRequests_[ackIndex].active = false;
+        }
+        return false;
+    }
+    return true;
+}
+
+static Service controlService(uint64_t deviceIdentifier) {
+    return {deviceIdentifier, service::CONTROL, SERVICE_INDEX_CONTROL};
+}
+
+bool Bus::identify(uint64_t deviceIdentifier, bool requestAck) { return sendCommand(controlService(deviceIdentifier), command::CONTROL_IDENTIFY, nullptr, 0, requestAck); }
+bool Bus::resetDevice(uint64_t deviceIdentifier, bool requestAck) { return sendCommand(controlService(deviceIdentifier), command::CONTROL_RESET, nullptr, 0, requestAck); }
+bool Bus::standby(uint64_t deviceIdentifier, uint32_t durationMs, bool requestAck) { return sendCommand(controlService(deviceIdentifier), command::CONTROL_STANDBY, &durationMs, sizeof(durationMs), requestAck); }
+bool Bus::requestDeviceDescription(uint64_t deviceIdentifier) { return getRegister(controlService(deviceIdentifier), reg::DEVICE_DESCRIPTION); }
+bool Bus::requestProductIdentifier(uint64_t deviceIdentifier) { return getRegister(controlService(deviceIdentifier), reg::PRODUCT_IDENTIFIER); }
+bool Bus::requestFirmwareVersion(uint64_t deviceIdentifier) { return getRegister(controlService(deviceIdentifier), reg::FIRMWARE_VERSION); }
+bool Bus::requestUptime(uint64_t deviceIdentifier) { return getRegister(controlService(deviceIdentifier), reg::UPTIME); }
+
+bool Bus::setStatusLight(uint64_t deviceIdentifier, uint8_t red, uint8_t green, uint8_t blue, uint8_t speed) {
+    const uint8_t data[] = {red, green, blue, speed};
+    return sendCommand(controlService(deviceIdentifier), command::CONTROL_SET_STATUS_LIGHT, data, sizeof(data));
+}
+
 void Bus::onPacket(PacketHandler handler, void *context) {
     packetHandler_ = handler;
     packetContext_ = context;
@@ -174,6 +283,67 @@ void Bus::onDevice(DeviceHandler handler, void *context) {
 void Bus::onAck(AckHandler handler, void *context) {
     ackHandler_ = handler;
     ackContext_ = context;
+}
+
+void Bus::onDeviceEvent(DeviceEventHandler handler, void *context) {
+    deviceEventHandler_ = handler;
+    deviceEventContext_ = context;
+}
+
+void Bus::onCommandError(CommandErrorHandler handler, void *context) {
+    commandErrorHandler_ = handler;
+    commandErrorContext_ = context;
+}
+
+uint8_t Bus::addPacketHandler(PacketHandler handler, void *context, uint64_t deviceIdentifier, uint8_t serviceIndex, uint16_t serviceCommand) {
+    if (handler == nullptr) return INVALID_SUBSCRIPTION;
+    for (uint8_t index = 0; index < MAX_SUBSCRIBERS; ++index) {
+        if (packetSubscriptions_[index].handler == nullptr) {
+            packetSubscriptions_[index] = {handler, context, deviceIdentifier, serviceCommand, serviceIndex};
+            return index;
+        }
+    }
+    return INVALID_SUBSCRIPTION;
+}
+
+uint8_t Bus::addDeviceHandler(DeviceHandler handler, void *context) {
+    if (handler == nullptr) return INVALID_SUBSCRIPTION;
+    for (uint8_t index = 0; index < MAX_SUBSCRIBERS; ++index) {
+        if (deviceSubscriptions_[index].handler == nullptr) {
+            deviceSubscriptions_[index] = {handler, context};
+            return index;
+        }
+    }
+    return INVALID_SUBSCRIPTION;
+}
+
+uint8_t Bus::addAckHandler(AckHandler handler, void *context) {
+    if (handler == nullptr) return INVALID_SUBSCRIPTION;
+    for (uint8_t index = 0; index < MAX_SUBSCRIBERS; ++index) {
+        if (ackSubscriptions_[index].handler == nullptr) {
+            ackSubscriptions_[index] = {handler, context};
+            return index;
+        }
+    }
+    return INVALID_SUBSCRIPTION;
+}
+
+bool Bus::removePacketHandler(uint8_t subscription) {
+    if (subscription >= MAX_SUBSCRIBERS || packetSubscriptions_[subscription].handler == nullptr) return false;
+    memset(&packetSubscriptions_[subscription], 0, sizeof(packetSubscriptions_[subscription]));
+    return true;
+}
+
+bool Bus::removeDeviceHandler(uint8_t subscription) {
+    if (subscription >= MAX_SUBSCRIBERS || deviceSubscriptions_[subscription].handler == nullptr) return false;
+    memset(&deviceSubscriptions_[subscription], 0, sizeof(deviceSubscriptions_[subscription]));
+    return true;
+}
+
+bool Bus::removeAckHandler(uint8_t subscription) {
+    if (subscription >= MAX_SUBSCRIBERS || ackSubscriptions_[subscription].handler == nullptr) return false;
+    memset(&ackSubscriptions_[subscription], 0, sizeof(ackSubscriptions_[subscription]));
+    return true;
 }
 
 const Diagnostics &Bus::diagnostics() const {
@@ -215,14 +385,92 @@ void Bus::handlePacket(const PacketView &packet) {
     Device *knownDevice = findDevice(packet.deviceIdentifier);
     if (knownDevice != nullptr) {
         knownDevice->lastSeen = millis();
+        if (packet.isReport() && knownDevice->reportsSinceAnnounce != 0xff) {
+            ++knownDevice->reportsSinceAnnounce;
+        }
     }
     if (packet.isReport() && packet.serviceIndex == SERVICE_INDEX_CONTROL && packet.serviceCommand == CMD_ANNOUNCE) {
         handleAnnounce(packet);
     }
     handleAck(packet);
-    if (packetHandler_ != nullptr) {
-        packetHandler_(packet, packetContext_);
+    handleRegisterResponse(packet);
+    handleCommandError(packet);
+    if (packet.isEvent() && !acceptEvent(packet, knownDevice)) {
+        return;
     }
+    dispatchPacket(packet);
+}
+
+void Bus::handleRegisterResponse(const PacketView &packet) {
+    if (!packet.isReport() || !packet.isRegisterGet()) return;
+    for (uint8_t index = 0; index < MAX_REGISTER_REQUESTS; ++index) {
+        RegisterRequest &request = registerRequests_[index];
+        if (request.active && request.deviceIdentifier == packet.deviceIdentifier && request.serviceIndex == packet.serviceIndex && request.serviceCommand == packet.serviceCommand) {
+            RegisterResponseHandler handler = request.handler;
+            void *context = request.context;
+            request.active = false;
+            handler(&packet, context);
+            return;
+        }
+    }
+}
+
+void Bus::handleCommandError(const PacketView &packet) {
+    if (!packet.isReport() || packet.serviceCommand != CMD_COMMAND_NOT_IMPLEMENTED || packet.dataSize < 4) return;
+    ++diagnostics_.commandErrors;
+    if (commandErrorHandler_ != nullptr) {
+        const Service source = service(packet.deviceIdentifier, packet.serviceIndex);
+        commandErrorHandler_(source, readU16(packet.data), readU16(packet.data + 2), commandErrorContext_);
+    }
+}
+
+void Bus::dispatchPacket(const PacketView &packet) {
+    if (packetHandler_ != nullptr) packetHandler_(packet, packetContext_);
+    for (uint8_t index = 0; index < MAX_SUBSCRIBERS; ++index) {
+        const PacketSubscription subscription = packetSubscriptions_[index];
+        if (subscription.handler != nullptr && (subscription.deviceIdentifier == 0 || subscription.deviceIdentifier == packet.deviceIdentifier) && (subscription.serviceIndex == 0xff || subscription.serviceIndex == packet.serviceIndex) && (subscription.serviceCommand == 0xffff || subscription.serviceCommand == packet.serviceCommand)) {
+            subscription.handler(packet, subscription.context);
+        }
+    }
+}
+
+void Bus::dispatchDevice(const Device &device, bool connected) {
+    if (deviceHandler_ != nullptr) deviceHandler_(device, connected, deviceContext_);
+    for (uint8_t index = 0; index < MAX_SUBSCRIBERS; ++index) {
+        const DeviceSubscription subscription = deviceSubscriptions_[index];
+        if (subscription.handler != nullptr) subscription.handler(device, connected, subscription.context);
+    }
+}
+
+void Bus::dispatchAck(uint64_t deviceIdentifier, uint16_t packetCrc, bool acknowledged) {
+    if (ackHandler_ != nullptr) ackHandler_(deviceIdentifier, packetCrc, acknowledged, ackContext_);
+    for (uint8_t index = 0; index < MAX_SUBSCRIBERS; ++index) {
+        const AckSubscription subscription = ackSubscriptions_[index];
+        if (subscription.handler != nullptr) subscription.handler(deviceIdentifier, packetCrc, acknowledged, subscription.context);
+    }
+}
+
+bool Bus::acceptEvent(const PacketView &packet, Device *knownDevice) {
+    if (knownDevice == nullptr) {
+        return true;
+    }
+    const uint8_t counter = packet.eventCounter();
+    if (!knownDevice->eventCounterValid) {
+        knownDevice->eventCounter = counter;
+        knownDevice->eventCounterValid = true;
+        return true;
+    }
+    const uint8_t distance = static_cast<uint8_t>((counter - knownDevice->eventCounter) & 0x7f);
+    if (distance == 0) {
+        ++diagnostics_.duplicateEvents;
+        return false;
+    }
+    if (distance != 1) {
+        ++diagnostics_.outOfOrderEvents;
+        return false;
+    }
+    knownDevice->eventCounter = counter;
+    return true;
 }
 
 int8_t Bus::trackAck(const Frame &frame) {
@@ -255,9 +503,7 @@ void Bus::handleAck(const PacketView &packet) {
         if (request.active && request.frame.deviceIdentifier == packet.deviceIdentifier && request.crc == packet.serviceCommand) {
             request.active = false;
             ++diagnostics_.acksReceived;
-            if (ackHandler_ != nullptr) {
-                ackHandler_(request.frame.deviceIdentifier, request.crc, true, ackContext_);
-            }
+            dispatchAck(request.frame.deviceIdentifier, request.crc, true);
             return;
         }
     }
@@ -272,15 +518,26 @@ void Bus::processAcks(uint32_t now) {
         if (request.attempts >= ACK_ATTEMPTS) {
             request.active = false;
             ++diagnostics_.ackTimeouts;
-            if (ackHandler_ != nullptr) {
-                ackHandler_(request.frame.deviceIdentifier, request.crc, false, ackContext_);
-            }
+            dispatchAck(request.frame.deviceIdentifier, request.crc, false);
         } else if (queueFrame(request.frame)) {
             ++request.attempts;
             ++diagnostics_.ackRetries;
             request.nextRetry = now + request.attempts * ACK_DELAY_MS;
         } else {
             request.nextRetry = now + ACK_DELAY_MS;
+        }
+    }
+}
+
+void Bus::processRegisterRequests(uint32_t now) {
+    for (uint8_t index = 0; index < MAX_REGISTER_REQUESTS; ++index) {
+        RegisterRequest &request = registerRequests_[index];
+        if (request.active && static_cast<int32_t>(now - request.deadline) >= 0) {
+            RegisterResponseHandler handler = request.handler;
+            void *context = request.context;
+            request.active = false;
+            ++diagnostics_.registerTimeouts;
+            handler(nullptr, context);
         }
     }
 }
@@ -306,9 +563,30 @@ void Bus::handleAnnounce(const PacketView &packet) {
         ++diagnostics_.receiveOverflows;
         return;
     }
+    const uint8_t previousRestartCounter = knownDevice->restartCounter;
+    const uint8_t restartCounter = static_cast<uint8_t>(readU16(packet.data) & 0x0f);
+    const bool restarted = !created && restartCounter != 0 && previousRestartCounter != 0 && restartCounter < previousRestartCounter;
+    const uint8_t observedReports = knownDevice->reportsSinceAnnounce;
+    const uint8_t announcedReports = packet.data[2];
     knownDevice->lastSeen = millis();
     knownDevice->announceFlags = readU16(packet.data);
     knownDevice->packetCount = packet.data[2];
+    knownDevice->restartCounter = restartCounter;
+    knownDevice->reportsSinceAnnounce = 0;
+    if (restarted) {
+        knownDevice->eventCounterValid = false;
+        ++diagnostics_.deviceRestarts;
+        if (deviceEventHandler_ != nullptr) {
+            deviceEventHandler_(*knownDevice, DeviceEvent::Restarted, deviceEventContext_);
+        }
+    }
+    if (!created && announcedReports != 0 && observedReports < announcedReports) {
+        diagnostics_.missedReports += announcedReports - observedReports;
+        knownDevice->eventCounterValid = false;
+        if (deviceEventHandler_ != nullptr) {
+            deviceEventHandler_(*knownDevice, DeviceEvent::ReportsMissed, deviceEventContext_);
+        }
+    }
     uint8_t serviceCount = static_cast<uint8_t>((packet.dataSize - 4) / 4);
     if (serviceCount > MAX_SERVICES_PER_DEVICE) {
         serviceCount = MAX_SERVICES_PER_DEVICE;
@@ -317,13 +595,14 @@ void Bus::handleAnnounce(const PacketView &packet) {
     for (uint8_t index = 0; index < serviceCount; ++index) {
         knownDevice->serviceClasses[index] = readU32(packet.data + 4 + index * 4);
     }
-    if (created && deviceHandler_ != nullptr) {
-        deviceHandler_(*knownDevice, true, deviceContext_);
+    if (created) dispatchDevice(*knownDevice, true);
+    if (created && deviceEventHandler_ != nullptr) {
+        deviceEventHandler_(*knownDevice, DeviceEvent::Connected, deviceEventContext_);
     }
 }
 
 void Bus::queueAnnounce() {
-    uint8_t announce[4] = {0x00, 0x08, packetCount_++, 0x00};
+    uint8_t announce[4] = {0x00, 0x08, 0x01, 0x00};
     Frame frame;
     resetFrame(frame, selfIdentifier_, 0);
     if (appendPacket(frame, SERVICE_INDEX_CONTROL, CMD_ANNOUNCE, announce, sizeof(announce))) {
@@ -382,6 +661,69 @@ bool SensorClient::setStreaming(uint8_t samples) const {
 
 bool SensorClient::setStreamingInterval(uint32_t milliseconds) const {
     return bus_.setRegister(resolve(), reg::STREAMING_INTERVAL, milliseconds);
+}
+
+bool SensorClient::setReadingRange(uint32_t range) const {
+    return bus_.setRegister(resolve(), reg::READING_RANGE, range);
+}
+
+bool SensorClient::setInactiveThreshold(int32_t threshold) const {
+    return bus_.setRegister(resolve(), reg::LOW_THRESHOLD, threshold);
+}
+
+bool SensorClient::setActiveThreshold(int32_t threshold) const {
+    return bus_.setRegister(resolve(), reg::HIGH_THRESHOLD, threshold);
+}
+
+bool SensorClient::calibrate(bool requestAck) const {
+    return bus_.sendCommand(resolve(), CMD_CALIBRATE, nullptr, 0, requestAck);
+}
+
+bool SensorClient::requestStatus() const {
+    return bus_.getRegister(resolve(), reg::STATUS_CODE);
+}
+
+bool SensorClient::requestPreferredStreamingInterval() const {
+    return bus_.getRegister(resolve(), reg::STREAMING_PREFERRED_INTERVAL);
+}
+
+bool SensorClient::requestReadingResolution() const {
+    return bus_.getRegister(resolve(), reg::READING_RESOLUTION);
+}
+
+bool SensorClient::requestInstanceName() const {
+    return bus_.getRegister(resolve(), reg::INSTANCE_NAME);
+}
+
+bool SensorClient::matchesReading(const PacketView &packet) const {
+    const Service target = resolve();
+    return target.valid() && packet.deviceIdentifier == target.deviceIdentifier && packet.serviceIndex == target.serviceIndex && packet.isRegisterGet() && packet.registerCode() == reg::READING;
+}
+
+ActuatorClient::ActuatorClient(Bus &bus, uint32_t serviceClass, uint8_t instance) : bus_(bus), serviceClass_(serviceClass), instance_(instance) {}
+
+bool ActuatorClient::connected() const {
+    return resolve().valid();
+}
+
+Service ActuatorClient::resolve() const {
+    return bus_.findService(serviceClass_, instance_);
+}
+
+bool ActuatorClient::setIntensity(uint32_t intensity, bool requestAck) const {
+    return bus_.setRegister(resolve(), reg::INTENSITY, intensity, requestAck);
+}
+
+bool ActuatorClient::setValue(int32_t value, bool requestAck) const {
+    return bus_.setRegister(resolve(), reg::VALUE, value, requestAck);
+}
+
+bool ActuatorClient::requestStatus() const {
+    return bus_.getRegister(resolve(), reg::STATUS_CODE);
+}
+
+bool ActuatorClient::requestInstanceName() const {
+    return bus_.getRegister(resolve(), reg::INSTANCE_NAME);
 }
 
 ButtonClient::ButtonClient(Bus &bus, uint8_t instance) : SensorClient(bus, service::BUTTON, instance) {}

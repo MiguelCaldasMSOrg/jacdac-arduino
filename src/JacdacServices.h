@@ -57,11 +57,24 @@ constexpr uint16_t STREAMING_INTERVAL = 0x004;
 constexpr uint16_t LOW_THRESHOLD = 0x005;
 constexpr uint16_t HIGH_THRESHOLD = 0x006;
 constexpr uint16_t MAX_POWER = 0x007;
+constexpr uint16_t READING_RANGE = 0x008;
+constexpr uint16_t CLIENT_VARIANT = 0x009;
 constexpr uint16_t READING = 0x101;
+constexpr uint16_t STREAMING_PREFERRED_INTERVAL = 0x102;
+constexpr uint16_t STATUS_CODE = 0x103;
 constexpr uint16_t READING_ERROR = 0x106;
 constexpr uint16_t MIN_READING = 0x104;
 constexpr uint16_t MAX_READING = 0x105;
 constexpr uint16_t VARIANT = 0x107;
+constexpr uint16_t READING_RESOLUTION = 0x108;
+constexpr uint16_t INSTANCE_NAME = 0x109;
+constexpr uint16_t SUPPORTED_RANGES = 0x10a;
+constexpr uint16_t DEVICE_DESCRIPTION = 0x180;
+constexpr uint16_t PRODUCT_IDENTIFIER = 0x181;
+constexpr uint16_t MCU_TEMPERATURE = 0x182;
+constexpr uint16_t BOOTLOADER_PRODUCT_IDENTIFIER = 0x184;
+constexpr uint16_t FIRMWARE_VERSION = 0x185;
+constexpr uint16_t UPTIME = 0x186;
 constexpr uint16_t BUTTON_PRESSED = 0x181;
 constexpr uint16_t BUTTON_ANALOG = 0x180;
 constexpr uint16_t LED_NUM_PIXELS = 0x182;
@@ -79,6 +92,10 @@ constexpr uint16_t ROTARY_CLICKER = 0x181;
 namespace command {
 
 constexpr uint16_t LED_STRIP_RUN = 0x081;
+constexpr uint16_t CONTROL_IDENTIFY = 0x081;
+constexpr uint16_t CONTROL_RESET = 0x082;
+constexpr uint16_t CONTROL_SET_STATUS_LIGHT = 0x084;
+constexpr uint16_t CONTROL_STANDBY = 0x087;
 
 } // namespace command
 

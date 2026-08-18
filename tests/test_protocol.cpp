@@ -62,10 +62,21 @@ static void testMalformedPacket() {
     assert(offset == frame.size);
 }
 
+static void testEventDecoding() {
+    PacketView packet = {1, nullptr, static_cast<uint16_t>(0x8000 | (0x35 << 8) | 0x81), 1, 0, 0};
+    assert(packet.isEvent());
+    assert(packet.eventCode() == 0x81);
+    assert(packet.eventCounter() == 0x35);
+
+    packet.flags = FRAME_FLAG_COMMAND;
+    assert(!packet.isEvent());
+}
+
 int main() {
     testKnownCrc();
     testFrameRoundTrip();
     testBounds();
     testMalformedPacket();
+    testEventDecoding();
     return 0;
 }

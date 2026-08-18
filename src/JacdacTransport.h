@@ -24,6 +24,11 @@ public:
 #elif defined(NRF51)
     void handleUart();
 #endif
+#if defined(JACDAC_TEST)
+    void injectFrame(const Frame &frame);
+    bool takeSentFrame(Frame &frame);
+    void completeTransmit();
+#endif
 
 private:
     Nrf52Transport();
