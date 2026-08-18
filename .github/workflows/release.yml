@@ -25,6 +25,9 @@ jobs:
             exit 1
           fi
 
+          ls -alR
+          cat library.properties
+
           version="$(sed -n 's/^version=//p' library.properties)"
           tag_version="${GITHUB_REF_NAME#v}"
           if [[ "$version" != "$tag_version" ]]; then
