@@ -1,0 +1,54 @@
+name: Release Arduino library
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out tag
+        uses: actions/checkout@v4
+
+      - name: Build Arduino library ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Tag $GITHUB_REF_NAME must use the form vX.Y.Z" >&2
+            exit 1
+          fi
+
+          version="$(sed -n 's/^version=//p' library.properties)"
+          tag_version="${GITHUB_REF_NAME#v}"
+          if [[ "$version" != "$tag_version" ]]; then
+            echo "Tag $GITHUB_REF_NAME does not match library.properties version $version" >&2
+            exit 1
+          fi
+
+          package_name="Jacdac-MicroBit-Arduino"
+          package_root="release/${package_name}"
+          mkdir -p "${package_root}"
+          cp library.properties keywords.txt LICENSE README.md "${package_root}/"
+          cp -R src examples "${package_root}/"
+
+          archive="Jacdac-MicroBit-Arduino-${version}.zip"
+          (cd release && zip -r "../${archive}" "${package_name}")
+
+          unzip -l "${archive}"
+          if unzip -Z1 "${archive}" | grep -Eq '(^|/)(tests|build|\.git)(/|$)|\.code-workspace$'; then
+            echo "Release ZIP contains excluded content" >&2
+            exit 1
+          fi
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: gh release create "$GITHUB_REF_NAME" "Jacdac-MicroBit-Arduino-${GITHUB_REF_NAME#v}.zip" --verify-tag --generate-notes --title "Jacdac-MicroBit-Arduino ${GITHUB_REF_NAME#v}"

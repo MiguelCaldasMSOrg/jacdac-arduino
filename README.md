@@ -44,6 +44,17 @@ arduino-cli compile --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none --li
 arduino-cli compile --fqbn sandeepmistry:nRF5:BBCmicrobit:softdevice=none --library . examples\MicrobitV1
 ```
 
+GitHub releases provide a minimal `Jacdac-MicroBit-Arduino-X.Y.Z.zip` containing only the Arduino library metadata, source, examples, license, and README. Download that named asset, not GitHub's automatic **Source code** archives, and install it with **Sketch > Include Library > Add .ZIP Library**. The Arduino ZIP excludes tests, local builds, Git metadata, and editor workspace files.
+
+Maintainers create a release by updating `version` in `library.properties`, committing and pushing that change, then pushing a matching semantic-version tag:
+
+```powershell
+git tag -a v0.2.1 -m "Jacdac Arduino 0.2.1"
+git push origin v0.2.1
+```
+
+The release workflow rejects a tag whose version does not match `library.properties`.
+
 ## First sketch
 
 ```cpp
