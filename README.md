@@ -36,7 +36,8 @@ The transport owns `P12` on both boards. It additionally owns UART0 and TIMER2 o
 Install the nRF5 core if it is not already present:
 
 ```powershell
-arduino-cli core install sandeepmistry:nRF5
+arduino-cli core update-index --additional-urls https://sandeepmistry.github.io/arduino-nRF5/package_nRF5_boards_index.json
+arduino-cli core install sandeepmistry:nRF5 --additional-urls https://sandeepmistry.github.io/arduino-nRF5/package_nRF5_boards_index.json
 ```
 
 Install this repository as an Arduino library by placing or linking it in the Arduino libraries directory. For command-line builds from this checkout:
@@ -46,13 +47,13 @@ arduino-cli compile --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none --li
 arduino-cli compile --fqbn sandeepmistry:nRF5:BBCmicrobit:softdevice=none --library . examples\MicrobitV1
 ```
 
-GitHub releases provide a minimal `Jacdac-MicroBit-Arduino-X.Y.Z.zip` containing only the Arduino library metadata, source, examples, license, README, and API reference. Download that named asset, not GitHub's automatic **Source code** archives, and install it with **Sketch > Include Library > Add .ZIP Library**. The Arduino ZIP excludes tests, local builds, Git metadata, and editor workspace files.
+GitHub releases provide a minimal `Jacdac-X.Y.Z.zip` containing only the Arduino library metadata, source, examples, license, README, and API reference. Download that named asset, not GitHub's automatic **Source code** archives, and install it with **Sketch > Include Library > Add .ZIP Library**. The Arduino ZIP excludes tests, local builds, Git metadata, and editor workspace files.
 
 Maintainers create a release by updating `version` in `library.properties`, committing and pushing that change, then pushing a matching semantic-version tag:
 
 ```powershell
-git tag -a v0.2.1 -m "Jacdac Arduino 0.2.1"
-git push origin v0.2.1
+git tag -a v0.4.0 -m "Jacdac 0.4.0"
+git push origin v0.4.0
 ```
 
 The release workflow rejects a tag whose version does not match `library.properties`.

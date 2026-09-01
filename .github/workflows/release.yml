@@ -94,13 +94,13 @@ jobs:
           set -euo pipefail
 
           version="$(sed -n 's/^version=//p' library.properties)"
-          package_name="Jacdac-MicroBit-Arduino"
+          package_name="Jacdac"
           package_root="release/${package_name}"
           mkdir -p "${package_root}"
           cp library.properties keywords.txt LICENSE README.md API.md ARCHITECTURE.md "${package_root}/"
           cp -R src examples "${package_root}/"
 
-          archive="Jacdac-MicroBit-Arduino-${version#v}.zip"
+          archive="Jacdac-${version#v}.zip"
           (cd release && zip -r "../${archive}" "${package_name}")
 
           unzip -l "${archive}"
@@ -113,4 +113,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
-        run: gh release create "$GITHUB_REF_NAME" "Jacdac-MicroBit-Arduino-${GITHUB_REF_NAME#v}.zip" --verify-tag --generate-notes --title "Jacdac-MicroBit-Arduino ${GITHUB_REF_NAME#v}"
+        run: gh release create "$GITHUB_REF_NAME" "Jacdac-${GITHUB_REF_NAME#v}.zip" --verify-tag --generate-notes --title "Jacdac ${GITHUB_REF_NAME#v}"
