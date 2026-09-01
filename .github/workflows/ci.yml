@@ -16,6 +16,13 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v7
 
+      - name: Lint Arduino library
+        uses: arduino/arduino-lint-action@v3
+        with:
+          compliance: specification
+          library-manager: false
+          project-type: library
+
       - name: Run host tests
         shell: bash
         run: |

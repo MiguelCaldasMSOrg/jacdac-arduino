@@ -15,6 +15,13 @@ jobs:
       - name: Check out tag
         uses: actions/checkout@v7
 
+      - name: Lint Arduino library
+        uses: arduino/arduino-lint-action@v3
+        with:
+          compliance: specification
+          library-manager: false
+          project-type: library
+
       - name: Validate release version
         shell: bash
         run: |
