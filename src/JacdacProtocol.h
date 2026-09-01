@@ -17,6 +17,7 @@ constexpr uint8_t FRAME_FLAG_IDENTIFIER_IS_SERVICE_CLASS = 0x04;
 constexpr uint8_t FRAME_FLAG_VNEXT = 0x80;
 constexpr uint8_t SERVICE_INDEX_MASK = 0x3f;
 constexpr uint8_t SERVICE_INDEX_CONTROL = 0x00;
+constexpr uint8_t SERVICE_INDEX_MAX_REGULAR = 0x3a;
 constexpr uint8_t SERVICE_INDEX_BROADCAST = 0x3d;
 constexpr uint8_t SERVICE_INDEX_PIPE = 0x3e;
 constexpr uint8_t SERVICE_INDEX_CRC_ACK = 0x3f;

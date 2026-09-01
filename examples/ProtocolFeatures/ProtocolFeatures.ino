@@ -29,7 +29,7 @@ void deviceEvent(const Device &device, DeviceEvent event, void *) {
     Serial.print("device event: ");
     Serial.print(static_cast<uint8_t>(event));
     Serial.print(" id=0x");
-    Serial.println(static_cast<uint32_t>(device.identifier), HEX);
+    Serial.println(static_cast<uint32_t>(device.deviceIdentifier), HEX);
 }
 
 void commandError(const Service &target, uint16_t command, uint16_t packetCrc, void *) {
@@ -43,8 +43,8 @@ void commandError(const Service &target, uint16_t command, uint16_t packetCrc, v
 
 void setup() {
     Serial.begin(115200);
-    Jacdac.onDeviceEvent(deviceEvent);
-    Jacdac.onCommandError(commandError);
+    Jacdac.addDeviceHandler(deviceEvent);
+    Jacdac.setCommandErrorHandler(commandError);
     Jacdac.addPacketHandler(packetReceived);
     Jacdac.begin();
 }

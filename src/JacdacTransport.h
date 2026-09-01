@@ -7,15 +7,27 @@ namespace jacdac {
 using TransportReceiveHandler = void (*)(const Frame &frame, void *context);
 using TransportTransmitHandler = void (*)(void *context);
 
-class Nrf52Transport {
+struct TransportDiagnostics {
+    volatile uint32_t fallingEdges;
+    volatile uint32_t receiveStarts;
+    volatile uint32_t receiveCompletions;
+    volatile uint32_t receiveBytes;
+    volatile uint32_t receiveTimeouts;
+    volatile uint32_t receiveShortFrames;
+    volatile uint32_t receiveInvalidFrames;
+    volatile uint32_t receiveHardwareErrors;
+};
+
+class NrfTransport {
 public:
-    static Nrf52Transport &instance();
+    static NrfTransport &instance();
     bool begin(uint8_t pin, TransportReceiveHandler receiveHandler, TransportTransmitHandler transmitHandler, void *context);
     void end();
     bool send(const Frame &frame);
     uint64_t deviceIdentifier() const;
     uint32_t busErrors() const;
     uint32_t collisions() const;
+    const TransportDiagnostics &diagnostics() const;
 
     void handleLineFalling();
     void handleTimer();
@@ -31,13 +43,16 @@ public:
 #endif
 
 private:
-    Nrf52Transport();
+    NrfTransport();
     void schedule(uint32_t microseconds);
     void cancelSchedule();
     void scheduleTransmit();
     void startTransmit();
     void startReceive();
     void finishReceive(bool timeout);
+#if defined(NRF52833_XXAA)
+    void completeReceive();
+#endif
     void finishTransmit();
     void configureInput();
     void configureUarteReceive();
@@ -46,7 +61,7 @@ private:
     void driveLine(bool high);
     uint32_t randomAround(uint32_t value);
 
-    enum State : uint8_t { STOPPED, IDLE, WAITING_TO_TRANSMIT, RECEIVING, TRANSMITTING };
+    enum State : uint8_t { STOPPED, IDLE, WAITING_TO_TRANSMIT, RECEIVING, STOPPING_RECEIVE, TRANSMITTING };
     volatile State state_;
     volatile uint8_t timerPurpose_;
     uint8_t arduinoPin_;
@@ -54,6 +69,9 @@ private:
     Frame receiveFrame_;
     Frame transmitFrame_;
     volatile bool transmitPending_;
+#if defined(NRF52833_XXAA)
+    volatile bool receiveTimedOut_;
+#endif
 #if defined(NRF51)
     volatile size_t receiveLength_;
     volatile size_t transmitOffset_;
@@ -64,6 +82,7 @@ private:
     uint32_t randomState_;
     volatile uint32_t busErrors_;
     volatile uint32_t collisions_;
+    TransportDiagnostics diagnostics_;
 };
 
 } // namespace jacdac

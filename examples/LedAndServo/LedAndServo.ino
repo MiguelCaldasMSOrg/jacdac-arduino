@@ -21,7 +21,7 @@ void loop() {
         }
         if (servo.connected()) {
             servo.setEnabled(true);
-            servo.setAngle(floatToQ16(alternate ? 135.0f : 45.0f));
+            servo.setAngle(alternate ? 135.0f : 45.0f);
         }
         alternate = !alternate;
         nextUpdate = millis() + 1000;

@@ -48,7 +48,7 @@ static void packetReceived(const PacketView &packet, void *) {
 
 void setup() {
     Serial.begin(115200);
-    Jacdac.onPacket(packetReceived);
+    Jacdac.addPacketHandler(packetReceived);
     Jacdac.begin();
 }
 

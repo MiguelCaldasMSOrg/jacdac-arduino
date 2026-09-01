@@ -18,19 +18,43 @@ constexpr uint8_t ACK_ATTEMPTS = 4;
 constexpr uint32_t ACK_DELAY_MS = 40;
 constexpr uint32_t DEVICE_TIMEOUT_MS = 2000;
 
+enum class Error : uint8_t {
+    None,
+    NotRunning,
+    TransportUnavailable,
+    InvalidArgument,
+    InvalidService,
+    PacketTooLarge,
+    QueueFull,
+    NoCapacity,
+    DuplicateRequest,
+    InvalidSubscription
+};
+
 struct Device {
-    uint64_t identifier;
+    uint64_t deviceIdentifier;
+
+private:
+    friend class Bus;
     uint32_t lastSeen;
     uint16_t announceFlags;
     uint8_t packetCount;
+
+public:
     uint8_t serviceCount;
+
+private:
     uint8_t restartCounter;
-    uint8_t eventCounter;
     uint8_t reportsSinceAnnounce;
-    bool eventCounterValid;
+
+public:
     uint32_t serviceClasses[MAX_SERVICES_PER_DEVICE];
 
-    bool connected() const { return identifier != 0; }
+    bool connected() const { return deviceIdentifier != 0; }
+
+private:
+    uint8_t eventCounter;
+    bool eventCounterValid;
 };
 
 struct Service {
@@ -41,12 +65,6 @@ struct Service {
     bool valid() const { return deviceIdentifier != 0; }
 };
 
-using PacketHandler = void (*)(const PacketView &packet, void *context);
-using DeviceHandler = void (*)(const Device &device, bool connected, void *context);
-using AckHandler = void (*)(uint64_t deviceIdentifier, uint16_t packetCrc, bool acknowledged, void *context);
-using RegisterResponseHandler = void (*)(const PacketView *packet, void *context);
-using CommandErrorHandler = void (*)(const Service &service, uint16_t serviceCommand, uint16_t packetCrc, void *context);
-
 enum class DeviceEvent : uint8_t {
     Connected,
     Disconnected,
@@ -54,7 +72,11 @@ enum class DeviceEvent : uint8_t {
     ReportsMissed
 };
 
-using DeviceEventHandler = void (*)(const Device &device, DeviceEvent event, void *context);
+using PacketHandler = void (*)(const PacketView &packet, void *context);
+using DeviceHandler = void (*)(const Device &device, DeviceEvent event, void *context);
+using AckHandler = void (*)(uint64_t deviceIdentifier, uint16_t packetCrc, bool acknowledged, void *context);
+using RegisterResponseHandler = void (*)(const PacketView *packet, void *context);
+using CommandErrorHandler = void (*)(const Service &service, uint16_t serviceCommand, uint16_t packetCrc, void *context);
 
 struct Diagnostics {
     uint32_t framesReceived;
@@ -62,6 +84,8 @@ struct Diagnostics {
     uint32_t crcErrors;
     uint32_t receiveOverflows;
     uint32_t transmitOverflows;
+    uint32_t malformedPackets;
+    uint32_t deviceOverflows;
     uint32_t busErrors;
     uint32_t collisions;
     uint32_t acksReceived;
@@ -73,15 +97,23 @@ struct Diagnostics {
     uint32_t missedReports;
     uint32_t registerTimeouts;
     uint32_t commandErrors;
+    uint32_t fallingEdges;
+    uint32_t receiveStarts;
+    uint32_t receiveCompletions;
+    uint32_t receiveBytes;
+    uint32_t receiveTimeouts;
+    uint32_t receiveShortFrames;
+    uint32_t receiveInvalidFrames;
+    uint32_t receiveHardwareErrors;
 };
 
 struct ServiceBinding {
-    uint32_t serviceClass;
     uint64_t deviceIdentifier;
+    uint32_t serviceClass;
     uint8_t serviceIndex;
     uint8_t instance;
 
-    explicit ServiceBinding(uint32_t serviceClass = 0, uint8_t instance = 0) : serviceClass(serviceClass), deviceIdentifier(0), serviceIndex(0), instance(instance) {}
+    explicit ServiceBinding(uint32_t serviceClass = 0, uint8_t instance = 0) : deviceIdentifier(0), serviceClass(serviceClass), serviceIndex(0), instance(instance) {}
     bool bound() const { return deviceIdentifier != 0; }
     void bind(const Service &service) { deviceIdentifier = service.deviceIdentifier; serviceIndex = service.serviceIndex; serviceClass = service.serviceClass; }
     void clear() { deviceIdentifier = 0; serviceIndex = 0; }
@@ -93,16 +125,21 @@ public:
     bool add(const Service &service, uint16_t command, const void *data = nullptr, uint8_t size = 0);
     template <typename T> bool add(const Service &service, uint16_t command, const T &value) { return add(service, command, &value, sizeof(value)); }
     uint8_t packetCount() const { return packetCount_; }
+    Error error() const { return error_; }
 
 private:
     friend class Bus;
     Frame frame_;
     uint8_t packetCount_;
+    Error error_;
 };
 
 class Bus {
 public:
     Bus();
+    ~Bus();
+    Bus(const Bus &) = delete;
+    Bus &operator=(const Bus &) = delete;
     bool begin(uint8_t pin = 12);
     void end();
     void process();
@@ -134,20 +171,19 @@ public:
         return setRegister(service, reg, &value, sizeof(value), requestAck);
     }
 
-    void onPacket(PacketHandler handler, void *context = nullptr);
-    void onDevice(DeviceHandler handler, void *context = nullptr);
-    void onAck(AckHandler handler, void *context = nullptr);
-    void onDeviceEvent(DeviceEventHandler handler, void *context = nullptr);
-    void onCommandError(CommandErrorHandler handler, void *context = nullptr);
+    void setCommandErrorHandler(CommandErrorHandler handler, void *context = nullptr);
     uint8_t addPacketHandler(PacketHandler handler, void *context = nullptr, uint64_t deviceIdentifier = 0, uint8_t serviceIndex = 0xff, uint16_t serviceCommand = 0xffff);
     uint8_t addDeviceHandler(DeviceHandler handler, void *context = nullptr);
     uint8_t addAckHandler(AckHandler handler, void *context = nullptr);
     bool removePacketHandler(uint8_t subscription);
     bool removeDeviceHandler(uint8_t subscription);
     bool removeAckHandler(uint8_t subscription);
+    Error lastError() const;
     const Diagnostics &diagnostics() const;
 
 private:
+    friend class LedStripClient;
+    friend class ServiceClient;
     static void receiveFromTransport(const Frame &frame, void *context);
     static void transmitDoneFromTransport(void *context);
     void handleFrame(const Frame &frame);
@@ -161,7 +197,7 @@ private:
     void handleRegisterResponse(const PacketView &packet);
     void handleCommandError(const PacketView &packet);
     void dispatchPacket(const PacketView &packet);
-    void dispatchDevice(const Device &device, bool connected);
+    void dispatchDevice(const Device &device, DeviceEvent event);
     void dispatchAck(uint64_t deviceIdentifier, uint16_t packetCrc, bool acknowledged);
     void queueAnnounce();
     Device *findDevice(uint64_t identifier);
@@ -177,14 +213,6 @@ private:
     volatile uint8_t txTail_;
     volatile bool transmitting_;
     bool running_;
-    PacketHandler packetHandler_;
-    DeviceHandler deviceHandler_;
-    void *packetContext_;
-    void *deviceContext_;
-    AckHandler ackHandler_;
-    void *ackContext_;
-    DeviceEventHandler deviceEventHandler_;
-    void *deviceEventContext_;
     CommandErrorHandler commandErrorHandler_;
     void *commandErrorContext_;
     uint64_t selfIdentifier_;
@@ -220,14 +248,27 @@ private:
         AckHandler handler;
         void *context;
     } ackSubscriptions_[MAX_SUBSCRIBERS];
+    Error lastError_;
     Diagnostics diagnostics_;
 };
 
-class SensorClient {
+class ServiceClient {
 public:
-    SensorClient(Bus &bus, uint32_t serviceClass, uint8_t instance = 0);
+    ServiceClient(Bus &bus, uint32_t serviceClass, uint8_t instance = 0);
     bool connected() const;
     Service resolve() const;
+    bool bind(const Service &service);
+    void clearBinding();
+
+protected:
+    bool fail(Error error) const;
+    Bus &bus_;
+    mutable ServiceBinding binding_;
+};
+
+class SensorClient : public ServiceClient {
+public:
+    SensorClient(Bus &bus, uint32_t serviceClass, uint8_t instance = 0);
     bool requestReading() const;
     bool setStreaming(uint8_t samples = 255) const;
     bool setStreamingInterval(uint32_t milliseconds) const;
@@ -241,26 +282,14 @@ public:
     bool requestInstanceName() const;
     bool matchesReading(const PacketView &packet) const;
 
-protected:
-    Bus &bus_;
-    uint32_t serviceClass_;
-    uint8_t instance_;
 };
 
-class ActuatorClient {
+class ActuatorClient : public ServiceClient {
 public:
     ActuatorClient(Bus &bus, uint32_t serviceClass, uint8_t instance = 0);
-    bool connected() const;
-    Service resolve() const;
-    bool setIntensity(uint32_t intensity, bool requestAck = false) const;
-    bool setValue(int32_t value, bool requestAck = false) const;
     bool requestStatus() const;
     bool requestInstanceName() const;
 
-private:
-    Bus &bus_;
-    uint32_t serviceClass_;
-    uint8_t instance_;
 };
 
 class ButtonClient : public SensorClient {
@@ -287,11 +316,9 @@ public:
     bool requestVariant() const;
 };
 
-class LedStripClient {
+class LedStripClient : public ServiceClient {
 public:
     explicit LedStripClient(Bus &bus, uint8_t instance = 0);
-    bool connected() const;
-    Service resolve() const;
     bool setBrightness(uint8_t brightness, bool requestAck = false) const;
     bool setNumPixels(uint16_t numPixels, bool requestAck = false) const;
     bool setMaxPower(uint16_t milliamps, bool requestAck = false) const;
@@ -304,33 +331,130 @@ public:
     bool setAll(uint8_t red, uint8_t green, uint8_t blue, bool requestAck = false) const;
     bool setPixel(uint16_t pixel, uint8_t red, uint8_t green, uint8_t blue, bool requestAck = false) const;
 
-private:
-    Bus &bus_;
-    uint8_t instance_;
 };
 
-class LedClient {
+class LedClient : public ServiceClient {
 public:
     explicit LedClient(Bus &bus, uint8_t instance = 0);
-    bool connected() const;
-    bool setBrightness(uint8_t brightness) const;
-    bool setPixels(const uint8_t *rgb, uint8_t byteCount) const;
-
-private:
-    Bus &bus_;
-    uint8_t instance_;
+    bool setBrightness(uint8_t brightness, bool requestAck = false) const;
+    bool setPixels(const uint8_t *rgb, uint8_t byteCount, bool requestAck = false) const;
 };
 
-class ServoClient {
+class ServoClient : public ServiceClient {
 public:
     explicit ServoClient(Bus &bus, uint8_t instance = 0);
-    bool connected() const;
-    bool setAngle(int32_t angleDegreesQ16) const;
-    bool setEnabled(bool enabled) const;
+    bool setAngle(float angleDegrees, bool requestAck = false) const;
+    bool setAngleQ16(int32_t angleDegreesQ16, bool requestAck = false) const;
+    bool setEnabled(bool enabled, bool requestAck = false) const;
+};
 
-private:
-    Bus &bus_;
-    uint8_t instance_;
+class RelayClient : public ActuatorClient {
+public:
+    explicit RelayClient(Bus &bus, uint8_t instance = 0);
+    bool setActive(bool active, bool requestAck = false) const;
+    bool requestVariant() const;
+    bool requestMaxSwitchingCurrent() const;
+};
+
+class LightBulbClient : public ActuatorClient {
+public:
+    explicit LightBulbClient(Bus &bus, uint8_t instance = 0);
+    bool setBrightness(uint16_t brightness, bool requestAck = false) const;
+    bool requestDimmable() const;
+};
+
+class MotorClient : public ActuatorClient {
+public:
+    explicit MotorClient(Bus &bus, uint8_t instance = 0);
+    bool setSpeed(int16_t speedQ15, bool requestAck = false) const;
+    bool setEnabled(bool enabled, bool requestAck = false) const;
+};
+
+class DualMotorsClient : public ActuatorClient {
+public:
+    explicit DualMotorsClient(Bus &bus, uint8_t instance = 0);
+    bool setSpeeds(int16_t leftQ15, int16_t rightQ15, bool requestAck = false) const;
+    bool setEnabled(bool enabled, bool requestAck = false) const;
+};
+
+class BuzzerClient : public ActuatorClient {
+public:
+    explicit BuzzerClient(Bus &bus, uint8_t instance = 0);
+    bool setVolume(uint8_t volume, bool requestAck = false) const;
+    bool playTone(uint16_t periodMicroseconds, uint16_t dutyMicroseconds, uint16_t durationMilliseconds, bool requestAck = false) const;
+    bool playNote(uint16_t frequency, uint16_t volume, uint16_t durationMilliseconds, bool requestAck = false) const;
+};
+
+struct VibrationStep {
+    uint8_t duration8Milliseconds;
+    uint8_t intensity;
+};
+
+class VibrationMotorClient : public ServiceClient {
+public:
+    explicit VibrationMotorClient(Bus &bus, uint8_t instance = 0);
+    bool vibrate(const VibrationStep *steps, uint8_t count, bool requestAck = false) const;
+    bool stop(bool requestAck = false) const;
+    bool requestMaxVibrations() const;
+};
+
+class HidKeyboardClient : public ServiceClient {
+public:
+    explicit HidKeyboardClient(Bus &bus, uint8_t instance = 0);
+    bool key(uint16_t selector, uint8_t modifiers = 0, uint8_t action = 0, bool requestAck = false) const;
+    bool clear(bool requestAck = false) const;
+};
+
+class HidMouseClient : public ServiceClient {
+public:
+    explicit HidMouseClient(Bus &bus, uint8_t instance = 0);
+    bool setButton(uint16_t buttons, uint8_t event, bool requestAck = false) const;
+    bool move(int16_t deltaX, int16_t deltaY, uint16_t timeMilliseconds = 0, bool requestAck = false) const;
+    bool wheel(int16_t deltaY, uint16_t timeMilliseconds = 0, bool requestAck = false) const;
+};
+
+class HidJoystickClient : public ServiceClient {
+public:
+    explicit HidJoystickClient(Bus &bus, uint8_t instance = 0);
+    bool setButtons(const uint8_t *pressures, uint8_t count, bool requestAck = false) const;
+    bool setAxes(const int16_t *positionsQ15, uint8_t count, bool requestAck = false) const;
+    bool requestButtonCount() const;
+    bool requestAnalogButtons() const;
+    bool requestAxisCount() const;
+};
+
+class CharacterScreenClient : public ActuatorClient {
+public:
+    explicit CharacterScreenClient(Bus &bus, uint8_t instance = 0);
+    bool setMessage(const char *message, uint8_t size, bool requestAck = false) const;
+    bool setBrightness(uint16_t brightness, bool requestAck = false) const;
+    bool requestRows() const;
+    bool requestColumns() const;
+    bool requestVariant() const;
+};
+
+class CursorCharacterScreenClient : public ActuatorClient {
+public:
+    explicit CursorCharacterScreenClient(Bus &bus, uint8_t instance = 0);
+    bool setEnabled(uint16_t enabled, bool requestAck = false) const;
+    bool home(bool requestAck = false) const;
+    bool clear(bool requestAck = false) const;
+    bool setCursor(uint8_t x, uint8_t y, bool requestAck = false) const;
+    bool show(const char *message, uint8_t size, bool requestAck = false) const;
+    bool requestRows() const;
+    bool requestColumns() const;
+};
+
+class PowerClient : public ActuatorClient {
+public:
+    explicit PowerClient(Bus &bus, uint8_t instance = 0);
+    bool setAllowed(bool allowed, bool requestAck = false) const;
+    bool setMaxPower(uint16_t milliamps, bool requestAck = false) const;
+    bool requestCurrentDraw() const;
+    bool requestBatteryVoltage() const;
+    bool requestPowerStatus() const;
+    bool requestBatteryCharge() const;
+    bool requestBatteryCapacity() const;
 };
 
 extern Bus Jacdac;

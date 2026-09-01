@@ -88,7 +88,7 @@ static void updateRing() {
 }
 
 void setup() {
-    Jacdac.onPacket(packetReceived);
+    Jacdac.addPacketHandler(packetReceived);
     Jacdac.begin();
 }
 

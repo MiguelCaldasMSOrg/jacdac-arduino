@@ -1,0 +1,57 @@
+name: Validate Arduino library
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Run host tests
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p build/tests
+          sources=(src/JacdacProtocol.cpp src/Jacdac.cpp src/JacdacClients.cpp tests/mock_arduino.cpp tests/mock_transport.cpp)
+          g++ -std=c++11 -DJACDAC_TEST -Itests -Isrc -Wall -Wextra -Wpedantic "${sources[@]}" tests/test_protocol.cpp -o build/tests/test_protocol
+          build/tests/test_protocol
+          g++ -std=c++11 -DJACDAC_TEST -Itests -Isrc -Wall -Wextra -Wpedantic "${sources[@]}" tests/test_bus.cpp -o build/tests/test_bus
+          build/tests/test_bus
+
+      - name: Set up Arduino CLI
+        shell: bash
+        env:
+          ARDUINO_CLI_VERSION: 1.5.1
+          ARDUINO_CLI_SHA256: 28a8e119c498a25607821c36cb2dc49e8463941b261a0d99091baa7bc692dd2b
+        run: |
+          set -euo pipefail
+
+          install_dir="$RUNNER_TEMP/arduino-cli"
+          archive="$RUNNER_TEMP/arduino-cli.tar.gz"
+          download_url="https://github.com/arduino/arduino-cli/releases/download/v${ARDUINO_CLI_VERSION}/arduino-cli_${ARDUINO_CLI_VERSION}_Linux_64bit.tar.gz"
+          mkdir -p "$install_dir"
+          curl --fail --location --retry 5 --retry-all-errors --connect-timeout 15 --output "$archive" "$download_url"
+          echo "${ARDUINO_CLI_SHA256}  ${archive}" | sha256sum --check --strict
+          tar --extract --gzip --file "$archive" --directory "$install_dir" arduino-cli
+          chmod +x "$install_dir/arduino-cli"
+          echo "$install_dir" >> "$GITHUB_PATH"
+
+      - name: Build representative targets
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          arduino-cli core update-index
+          arduino-cli core install sandeepmistry:nRF5
+          arduino-cli compile --clean --library "$GITHUB_WORKSPACE" --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none examples/ProtocolFeatures
+          arduino-cli compile --clean --library "$GITHUB_WORKSPACE" --fqbn sandeepmistry:nRF5:BBCmicrobit:softdevice=none examples/ProtocolFeaturesV1

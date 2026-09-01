@@ -15,13 +15,13 @@ jobs:
       - name: Check out tag
         uses: actions/checkout@v7
 
-      - name: Build Arduino library ZIP
+      - name: Validate release version
         shell: bash
         run: |
           set -euo pipefail
 
-          if [[ ! "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Tag $GITHUB_REF_NAME must use the form vX.Y.Z" >&2
+          if [[ ! "$GITHUB_REF_NAME" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "Tag $GITHUB_REF_NAME must use the stable semantic-version form vX.Y.Z without leading zeros" >&2
             exit 1
           fi
 
@@ -32,10 +32,63 @@ jobs:
             exit 1
           fi
 
+      - name: Run host tests
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p build/tests
+          g++ -std=c++11 -DJACDAC_TEST -Itests -Isrc -Wall -Wextra -Wpedantic src/JacdacProtocol.cpp src/Jacdac.cpp src/JacdacClients.cpp tests/mock_arduino.cpp tests/mock_transport.cpp tests/test_protocol.cpp -o build/tests/test_protocol
+          build/tests/test_protocol
+          g++ -std=c++11 -DJACDAC_TEST -Itests -Isrc -Wall -Wextra -Wpedantic src/JacdacProtocol.cpp src/Jacdac.cpp src/JacdacClients.cpp tests/mock_arduino.cpp tests/mock_transport.cpp tests/test_bus.cpp -o build/tests/test_bus
+          build/tests/test_bus
+
+      - name: Set up Arduino CLI
+        shell: bash
+        env:
+          ARDUINO_CLI_VERSION: 1.5.1
+          ARDUINO_CLI_SHA256: 28a8e119c498a25607821c36cb2dc49e8463941b261a0d99091baa7bc692dd2b
+        run: |
+          set -euo pipefail
+
+          install_dir="$RUNNER_TEMP/arduino-cli"
+          archive="$RUNNER_TEMP/arduino-cli.tar.gz"
+          download_url="https://github.com/arduino/arduino-cli/releases/download/v${ARDUINO_CLI_VERSION}/arduino-cli_${ARDUINO_CLI_VERSION}_Linux_64bit.tar.gz"
+          mkdir -p "$install_dir"
+          curl --fail --location --retry 5 --retry-all-errors --connect-timeout 15 --output "$archive" "$download_url"
+          echo "${ARDUINO_CLI_SHA256}  ${archive}" | sha256sum --check --strict
+          tar --extract --gzip --file "$archive" --directory "$install_dir" arduino-cli
+          chmod +x "$install_dir/arduino-cli"
+          echo "$install_dir" >> "$GITHUB_PATH"
+          "$install_dir/arduino-cli" version
+
+      - name: Build micro:bit targets
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          arduino-cli core update-index
+          arduino-cli core install sandeepmistry:nRF5
+          for sketch in examples/*; do
+            case "$(basename "$sketch")" in
+              MicrobitV1|PeripheralKitV1|ProtocolFeaturesV1) continue ;;
+            esac
+            arduino-cli compile --clean --library "$GITHUB_WORKSPACE" --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none "$sketch"
+          done
+          for sketch in examples/MicrobitV1 examples/PeripheralKitV1 examples/ProtocolFeaturesV1; do
+            arduino-cli compile --clean --library "$GITHUB_WORKSPACE" --fqbn sandeepmistry:nRF5:BBCmicrobit:softdevice=none "$sketch"
+          done
+
+      - name: Build Arduino library ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          version="$(sed -n 's/^version=//p' library.properties)"
           package_name="Jacdac-MicroBit-Arduino"
           package_root="release/${package_name}"
           mkdir -p "${package_root}"
-          cp library.properties keywords.txt LICENSE README.md "${package_root}/"
+          cp library.properties keywords.txt LICENSE README.md API.md ARCHITECTURE.md "${package_root}/"
           cp -R src examples "${package_root}/"
 
           archive="Jacdac-MicroBit-Arduino-${version#v}.zip"
