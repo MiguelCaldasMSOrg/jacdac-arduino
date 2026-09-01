@@ -35,7 +35,7 @@ jobs:
           chmod +x "$install_dir/arduino-lint"
 
           "$install_dir/arduino-lint" --version
-          "$install_dir/arduino-lint" --compliance specification --library-manager submit --project-type library
+          "$install_dir/arduino-lint" --compliance strict --library-manager false --project-type library
 
       - name: Run host tests
         shell: bash
