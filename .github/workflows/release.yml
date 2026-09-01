@@ -64,11 +64,13 @@ jobs:
 
       - name: Build micro:bit targets
         shell: bash
+        env:
+          NRF5_BOARD_MANAGER_URL: https://sandeepmistry.github.io/arduino-nRF5/package_nRF5_boards_index.json
         run: |
           set -euo pipefail
 
-          arduino-cli core update-index
-          arduino-cli core install sandeepmistry:nRF5
+          arduino-cli core update-index --additional-urls "$NRF5_BOARD_MANAGER_URL"
+          arduino-cli core install sandeepmistry:nRF5 --additional-urls "$NRF5_BOARD_MANAGER_URL"
           for sketch in examples/*; do
             case "$(basename "$sketch")" in
               MicrobitV1|PeripheralKitV1|ProtocolFeaturesV1) continue ;;

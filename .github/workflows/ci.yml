@@ -48,10 +48,12 @@ jobs:
 
       - name: Build representative targets
         shell: bash
+        env:
+          NRF5_BOARD_MANAGER_URL: https://sandeepmistry.github.io/arduino-nRF5/package_nRF5_boards_index.json
         run: |
           set -euo pipefail
 
-          arduino-cli core update-index
-          arduino-cli core install sandeepmistry:nRF5
+          arduino-cli core update-index --additional-urls "$NRF5_BOARD_MANAGER_URL"
+          arduino-cli core install sandeepmistry:nRF5 --additional-urls "$NRF5_BOARD_MANAGER_URL"
           arduino-cli compile --clean --library "$GITHUB_WORKSPACE" --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none examples/ProtocolFeatures
           arduino-cli compile --clean --library "$GITHUB_WORKSPACE" --fqbn sandeepmistry:nRF5:BBCmicrobit:softdevice=none examples/ProtocolFeaturesV1
