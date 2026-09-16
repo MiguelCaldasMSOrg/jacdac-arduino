@@ -1,0 +1,5 @@
+{
+    "sketch": "examples\\HardwareValidation\\HardwareValidation.ino",
+    "configuration": "softdevice=none",
+    "board": "sandeepmistry:nRF5:BBCmicrobitV2"
+}
