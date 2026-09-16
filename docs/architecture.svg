@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="1530" viewBox="0 0 760 1530" role="img" aria-labelledby="title description">
+  <title id="title">Jacdac Arduino library architecture</title>
+  <desc id="description">Arduino sketches use typed service clients or the bus controller. The bus coordinates configuration, packet encoding, the nRF transport, hardware peripherals, and Jacdac devices.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#53656f"/>
+    </marker>
+    <style>
+      text {
+        font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+        letter-spacing: 0;
+      }
+      .layer {
+        fill: #ffffff;
+        stroke: #9dafb2;
+      }
+      .layer-title {
+        fill: #172a3a;
+        font-size: 18px;
+        font-weight: 700;
+      }
+      .node {
+        stroke: #9dafb2;
+      }
+      .node-label {
+        fill: #172a3a;
+        font-size: 16px;
+        font-weight: 700;
+        text-anchor: middle;
+      }
+      .node-label-light {
+        fill: #ffffff;
+      }
+      .edge {
+        fill: none;
+        stroke: #53656f;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2;
+        marker-end: url(#arrow);
+      }
+      .edge-bidirectional {
+        marker-start: url(#arrow);
+      }
+      .edge-config {
+        stroke-dasharray: 7 6;
+      }
+      .edge-label-background {
+        fill: #f7faf9;
+      }
+      .edge-label {
+        fill: #53656f;
+        font-size: 13px;
+        font-weight: 600;
+        text-anchor: middle;
+      }
+    </style>
+  </defs>
+
+  <rect width="760" height="1530" fill="#f7faf9"/>
+
+  <rect class="layer" x="32" y="24" width="696" height="166" rx="4"/>
+  <text class="layer-title" x="56" y="58">Application</text>
+
+  <rect class="layer" x="32" y="218" width="696" height="880" rx="4"/>
+  <text class="layer-title" x="56" y="253">Jacdac Arduino library</text>
+
+  <rect class="layer" x="32" y="1126" width="696" height="376" rx="4"/>
+  <text class="layer-title" x="56" y="1161">Hardware</text>
+
+  <path class="edge" d="M 300 156 V 300 H 145 V 560 H 200"/>
+  <path class="edge" d="M 460 156 V 300 H 625 V 724 H 560"/>
+  <g transform="translate(0 100)">
+    <path class="edge edge-config" d="M 280 346 V 426"/>
+    <path class="edge edge-config" d="M 560 312 H 592 V 610 H 560"/>
+    <path class="edge edge-config" d="M 200 312 H 105 V 834 H 68"/>
+    <path class="edge" d="M 380 494 V 590"/>
+    <path class="edge" d="M 300 658 V 724 H 210 V 800"/>
+    <path class="edge" d="M 460 658 V 724 H 550 V 800"/>
+    <path class="edge" d="M 692 834 H 710 V 640 H 560"/>
+    <path class="edge edge-bidirectional" d="M 550 868 V 1090"/>
+    <path class="edge" d="M 320 1158 V 1282"/>
+    <path class="edge" d="M 560 1316 H 640 V 1124 H 560"/>
+  </g>
+
+  <rect class="node" x="220" y="88" width="320" height="68" rx="4" fill="#ffffff"/>
+  <text class="node-label" x="380" y="128">Arduino sketch</text>
+
+  <g transform="translate(0 100)">
+    <rect class="node" x="200" y="278" width="360" height="68" rx="4" fill="#e9b949"/>
+    <text class="node-label" x="380" y="307">
+      <tspan x="380">Service constants and&#32;</tspan>
+      <tspan x="380" dy="21">capacity configuration</tspan>
+    </text>
+
+    <rect class="node" x="200" y="426" width="360" height="68" rx="4" fill="#7a5c99"/>
+    <text class="node-label node-label-light" x="380" y="466">Typed service clients</text>
+
+    <rect class="node" x="200" y="590" width="360" height="68" rx="4" fill="#277f75"/>
+    <text class="node-label node-label-light" x="380" y="630">Bus controller</text>
+
+    <rect class="node" x="68" y="800" width="284" height="68" rx="4" fill="#457b9d"/>
+    <text class="node-label node-label-light" x="210" y="840">Frame and packet codec</text>
+
+    <rect class="node" x="408" y="800" width="284" height="68" rx="4" fill="#d7664f"/>
+    <text class="node-label node-label-light" x="550" y="840">nRF single-wire transport</text>
+
+    <rect class="node" x="200" y="1090" width="360" height="68" rx="4" fill="#dce5e3"/>
+    <text class="node-label" x="380" y="1130">GPIO, UART, and timer</text>
+
+    <rect class="node" x="200" y="1282" width="360" height="68" rx="4" fill="#ffffff"/>
+    <text class="node-label" x="380" y="1322">Jacdac bus and devices</text>
+  </g>
+
+  <rect class="edge-label-background" x="67" y="318" width="156" height="20" rx="4"/>
+  <text class="edge-label" x="145" y="333">service operations</text>
+
+  <rect class="edge-label-background" x="544" y="318" width="162" height="20" rx="4"/>
+  <text class="edge-label" x="625" y="333">generic operations</text>
+
+  <g transform="translate(0 100)">
+    <rect class="edge-label-background" x="244" y="368" width="72" height="27" rx="4"/>
+    <text class="edge-label" x="280" y="386">defines</text>
+
+    <rect class="edge-label-background" x="560" y="464" width="64" height="27" rx="4"/>
+    <text class="edge-label" x="592" y="482">sizes</text>
+
+    <rect class="edge-label-background" x="69" y="676" width="72" height="27" rx="4"/>
+    <text class="edge-label" x="105" y="694">defines</text>
+
+    <rect class="edge-label-background" x="307" y="528" width="146" height="27" rx="4"/>
+    <text class="edge-label" x="380" y="546">resolve and queue</text>
+
+    <rect class="edge-label-background" x="235" y="674" width="130" height="27" rx="4"/>
+    <text class="edge-label" x="300" y="692">build and parse</text>
+
+    <rect class="edge-label-background" x="396" y="674" width="128" height="27" rx="4"/>
+    <text class="edge-label" x="460" y="692">outgoing frames</text>
+
+    <rect class="edge-label-background" x="568" y="746" width="140" height="45" rx="4"/>
+    <text class="edge-label" x="638" y="765">
+      <tspan x="638">validated incoming&#32;</tspan>
+      <tspan x="638" dy="17">frames</tspan>
+    </text>
+
+    <rect class="edge-label-background" x="515" y="956" width="70" height="27" rx="4"/>
+    <text class="edge-label" x="550" y="974">controls</text>
+
+    <rect class="edge-label-background" x="247" y="1204" width="146" height="27" rx="4"/>
+    <text class="edge-label" x="320" y="1222">single-wire traffic</text>
+
+    <rect class="edge-label-background" x="565" y="1204" width="150" height="27" rx="4"/>
+    <text class="edge-label" x="640" y="1222">single-wire traffic</text>
+  </g>
+</svg>
