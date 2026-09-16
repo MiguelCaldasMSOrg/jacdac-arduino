@@ -225,16 +225,25 @@ Register reports use the same `CMD_GET_REGISTER | register` command code as regi
 ## Commands and registers
 
 ```cpp
-bool Bus::sendCommand(const Service &service, uint16_t command,
-                      const void *data = nullptr, uint8_t size = 0,
-                      bool requestAck = false);
+bool Bus::sendCommand(
+    const Service &service,
+    uint16_t command,
+    const void *data = nullptr,
+    uint8_t size = 0,
+    bool requestAck = false);
 bool Bus::getRegister(const Service &service, uint16_t reg);
-bool Bus::setRegister(const Service &service, uint16_t reg,
-                      const void *data, uint8_t size,
-                      bool requestAck = false);
+bool Bus::setRegister(
+    const Service &service,
+    uint16_t reg,
+    const void *data,
+    uint8_t size,
+    bool requestAck = false);
 template <typename T>
-bool Bus::setRegister(const Service &service, uint16_t reg,
-                      const T &value, bool requestAck = false);
+bool Bus::setRegister(
+    const Service &service,
+    uint16_t reg,
+    const T &value,
+    bool requestAck = false);
 ```
 
 These methods return whether the request was validated and queued. `false` can indicate a stopped bus, invalid service, oversized packet, full transmit queue, unavailable ACK slot, or duplicate pending ACK request. A successful return does not by itself confirm remote execution.
@@ -251,10 +260,12 @@ Jacdac.setRegister(target, reg::VALUE, value, true);
 ```cpp
 using RegisterResponseHandler = void (*)(const PacketView *packet, void *context);
 
-bool Bus::getRegisterAsync(const Service &service, uint16_t reg,
-                           RegisterResponseHandler handler,
-                           void *context = nullptr,
-                           uint32_t timeoutMs = 1000);
+bool Bus::getRegisterAsync(
+    const Service &service,
+    uint16_t reg,
+    RegisterResponseHandler handler,
+    void *context = nullptr,
+    uint32_t timeoutMs = 1000);
 ```
 
 The callback receives the matching report or `nullptr` on timeout. The method rejects invalid services, null handlers, a full request table, and duplicate requests for the same device, service, and register.
@@ -276,8 +287,11 @@ Jacdac.getRegisterAsync(target, reg::READING, readingReceived);
 ### Multicast
 
 ```cpp
-bool Bus::sendMulticast(uint32_t serviceClass, uint16_t command,
-                        const void *data = nullptr, uint8_t size = 0);
+bool Bus::sendMulticast(
+    uint32_t serviceClass,
+    uint16_t command,
+    const void *data = nullptr,
+    uint8_t size = 0);
 ```
 
 Queues one broadcast command addressed to every service of the specified nonzero class. Multicast does not request ACKs.
@@ -288,8 +302,11 @@ Queues one broadcast command addressed to every service of the specified nonzero
 class CommandBatch {
 public:
     explicit CommandBatch(uint64_t deviceIdentifier, bool requestAck = false);
-    bool add(const Service &service, uint16_t command,
-             const void *data = nullptr, uint8_t size = 0);
+    bool add(
+        const Service &service,
+        uint16_t command,
+        const void *data = nullptr,
+        uint8_t size = 0);
     template <typename T>
     bool add(const Service &service, uint16_t command, const T &value);
     uint8_t packetCount() const;
@@ -313,10 +330,13 @@ Jacdac.sendBatch(batch);
 ```cpp
 bool Bus::identify(uint64_t deviceIdentifier, bool requestAck = false);
 bool Bus::resetDevice(uint64_t deviceIdentifier, bool requestAck = false);
-bool Bus::standby(uint64_t deviceIdentifier, uint32_t durationMs,
-                  bool requestAck = false);
-bool Bus::setStatusLight(uint64_t deviceIdentifier, uint8_t red,
-                         uint8_t green, uint8_t blue, uint8_t speed = 0);
+bool Bus::standby(uint64_t deviceIdentifier, uint32_t durationMs, bool requestAck = false);
+bool Bus::setStatusLight(
+    uint64_t deviceIdentifier,
+    uint8_t red,
+    uint8_t green,
+    uint8_t blue,
+    uint8_t speed = 0);
 bool Bus::requestDeviceDescription(uint64_t deviceIdentifier);
 bool Bus::requestProductIdentifier(uint64_t deviceIdentifier);
 bool Bus::requestFirmwareVersion(uint64_t deviceIdentifier);
@@ -330,22 +350,29 @@ These helpers address service index 0 on the specified device.
 ```cpp
 using PacketHandler = void (*)(const PacketView &, void *context);
 using DeviceHandler = void (*)(const Device &, DeviceEvent, void *context);
-using AckHandler = void (*)(uint64_t deviceIdentifier, uint16_t packetCrc,
-                            bool acknowledged, void *context);
-using CommandErrorHandler = void (*)(const Service &, uint16_t serviceCommand,
-                                     uint16_t packetCrc, void *context);
-uint8_t Bus::addPacketHandler(PacketHandler handler, void *context = nullptr,
-                              uint64_t deviceIdentifier = 0,
-                              uint8_t serviceIndex = 0xff,
-                              uint16_t serviceCommand = 0xffff);
+using AckHandler = void (*)(
+    uint64_t deviceIdentifier,
+    uint16_t packetCrc,
+    bool acknowledged,
+    void *context);
+using CommandErrorHandler = void (*)(
+    const Service &,
+    uint16_t serviceCommand,
+    uint16_t packetCrc,
+    void *context);
+uint8_t Bus::addPacketHandler(
+    PacketHandler handler,
+    void *context = nullptr,
+    uint64_t deviceIdentifier = 0,
+    uint8_t serviceIndex = 0xff,
+    uint16_t serviceCommand = 0xffff);
 uint8_t Bus::addDeviceHandler(DeviceHandler handler, void *context = nullptr);
 uint8_t Bus::addAckHandler(AckHandler handler, void *context = nullptr);
 
 bool Bus::removePacketHandler(uint8_t subscription);
 bool Bus::removeDeviceHandler(uint8_t subscription);
 bool Bus::removeAckHandler(uint8_t subscription);
-void Bus::setCommandErrorHandler(CommandErrorHandler handler,
-                                 void *context = nullptr);
+void Bus::setCommandErrorHandler(CommandErrorHandler handler, void *context = nullptr);
 ```
 
 All observers use fixed-capacity subscriptions. `addPacketHandler()` supports optional filters: zero matches every device, `0xff` every service index, and `0xffff` every service command. Add methods return `INVALID_SUBSCRIPTION` (`0xff`) when the handler is null or no slot remains. Remove methods return `false` for an invalid or inactive handle.
@@ -463,12 +490,14 @@ bool requestActualBrightness() const;
 bool requestNumPixels() const;
 bool requestMaxPixels() const;
 bool requestVariant() const;
-bool runProgram(const uint8_t *program, uint8_t size,
-                bool requestAck = false) const;
-bool setAll(uint8_t red, uint8_t green, uint8_t blue,
-            bool requestAck = false) const;
-bool setPixel(uint16_t pixel, uint8_t red, uint8_t green, uint8_t blue,
-              bool requestAck = false) const;
+bool runProgram(const uint8_t *program, uint8_t size, bool requestAck = false) const;
+bool setAll(uint8_t red, uint8_t green, uint8_t blue, bool requestAck = false) const;
+bool setPixel(
+    uint16_t pixel,
+    uint8_t red,
+    uint8_t green,
+    uint8_t blue,
+    bool requestAck = false) const;
 ```
 
 Brightness uses `uint8_t` [`u0.8`](docs/type-layouts/u0-8.svg); RGB operands are red, green, blue in that exact byte order. `setPixel()` accepts indexes through 16383. Variants and light types are defined by `LedStripVariant` and `LedStripLightType`.
@@ -478,8 +507,7 @@ Brightness uses `uint8_t` [`u0.8`](docs/type-layouts/u0-8.svg); RGB operands are
 ```cpp
 explicit LedClient(Bus &bus, uint8_t instance = 0);
 bool setBrightness(uint8_t brightness, bool requestAck = false) const;
-bool setPixels(const uint8_t *rgb, uint8_t byteCount,
-               bool requestAck = false) const;
+bool setPixels(const uint8_t *rgb, uint8_t byteCount, bool requestAck = false) const;
 bool requestPixels() const;
 bool requestNumPixels() const;
 bool requestVariant() const;
@@ -529,8 +557,10 @@ For haptic output, use `VibrationMotorClient`. `vibrate(steps, count, requestAck
 explicit PowerClient(Bus &bus, uint8_t instance = 0);
 bool setAllowed(bool allowed, bool requestAck = false) const;
 bool setMaxPower(uint16_t milliamps, bool requestAck = false) const;
-bool setKeepOnPulse(uint16_t durationMilliseconds, uint16_t periodMilliseconds,
-                    bool requestAck = false) const;
+bool setKeepOnPulse(
+    uint16_t durationMilliseconds,
+    uint16_t periodMilliseconds,
+    bool requestAck = false) const;
 bool requestAllowed() const;
 bool requestMaxPower() const;
 bool requestCurrentDraw() const;
@@ -758,8 +788,12 @@ uint16_t crc16(const void *data, size_t size);
 size_t frameSize(const Frame &frame);
 bool validateFrame(const Frame &frame, size_t receivedSize);
 void resetFrame(Frame &frame, uint64_t deviceIdentifier, uint8_t flags);
-bool appendPacket(Frame &frame, uint8_t serviceIndex, uint16_t serviceCommand,
-                  const void *data = nullptr, uint8_t dataSize = 0);
+bool appendPacket(
+    Frame &frame,
+    uint8_t serviceIndex,
+    uint16_t serviceCommand,
+    const void *data = nullptr,
+    uint8_t dataSize = 0);
 void finalizeFrame(Frame &frame);
 bool packetAt(const Frame &frame, size_t &offset, PacketView &packet);
 ```
