@@ -103,7 +103,6 @@ jobs:
           for sketch in examples/MicrobitV1 examples/PeripheralKitV1 examples/ProtocolFeaturesV1; do
             arduino-cli compile --clean --library "$GITHUB_WORKSPACE" --fqbn sandeepmistry:nRF5:BBCmicrobit:softdevice=none "$sketch"
           done
-          arduino-cli compile --clean --library "$GITHUB_WORKSPACE" --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none extras/HardwareValidation
 
       - name: Build Arduino library ZIP
         shell: bash

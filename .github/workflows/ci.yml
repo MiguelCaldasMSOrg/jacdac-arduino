@@ -80,4 +80,4 @@ jobs:
           arduino-cli core install sandeepmistry:nRF5 --additional-urls "$NRF5_BOARD_MANAGER_URL"
           arduino-cli compile --clean --library "$GITHUB_WORKSPACE" --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none examples/ProtocolFeatures
           arduino-cli compile --clean --library "$GITHUB_WORKSPACE" --fqbn sandeepmistry:nRF5:BBCmicrobit:softdevice=none examples/ProtocolFeaturesV1
-          arduino-cli compile --clean --library "$GITHUB_WORKSPACE" --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none extras/HardwareValidation
+          arduino-cli compile --clean --library "$GITHUB_WORKSPACE" --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none examples/HardwareValidation

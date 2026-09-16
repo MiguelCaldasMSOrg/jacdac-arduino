@@ -19,7 +19,7 @@ arduino-cli core update-index --additional-urls https://sandeepmistry.github.io/
 arduino-cli core install sandeepmistry:nRF5 --additional-urls https://sandeepmistry.github.io/arduino-nRF5/package_nRF5_boards_index.json
 ```
 
-Install the named `Jacdac-X.Y.Z.zip` release asset using **Sketch > Include Library > Add .ZIP Library**, or install this checkout as an Arduino library. The named ZIP excludes build output, tests, and the source-checkout bench. GitHub's automatic source archives are not the minimal Arduino library package.
+Install the named `Jacdac-X.Y.Z.zip` release asset using **Sketch > Include Library > Add .ZIP Library**. It contains the library source, documentation, and all examples, including `HardwareValidation`. The named ZIP excludes build output and tests; GitHub's automatic source archives are not the minimal Arduino library package.
 
 The default data connection is micro:bit `P12` to `JD_DATA`, with common ground and an appropriately rated Jacdac power source on `JD_PWR`. Do not power actuator chains directly from the micro:bit 3 V pin. Verify adapter switch position and supply ratings before use.
 

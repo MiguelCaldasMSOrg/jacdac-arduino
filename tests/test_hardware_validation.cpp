@@ -15,7 +15,7 @@ struct TestSerial {
 static TestSerial Serial;
 static constexpr int HEX = 16;
 
-#include "../extras/HardwareValidation/HardwareValidation.ino"
+#include "../examples/HardwareValidation/HardwareValidation.ino"
 
 static constexpr uint64_t DEVICE_ID = 0xaabbccddeeff0011ULL;
 
