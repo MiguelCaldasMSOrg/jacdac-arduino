@@ -61,7 +61,7 @@ private:
     void driveLine(bool high);
     uint32_t randomAround(uint32_t value);
 
-    enum State : uint8_t { STOPPED, IDLE, WAITING_TO_TRANSMIT, RECEIVING, STOPPING_RECEIVE, TRANSMITTING };
+    enum State: uint8_t { STOPPED, IDLE, WAITING_TO_TRANSMIT, RECEIVING, STOPPING_RECEIVE, TRANSMITTING };
     volatile State state_;
     volatile uint8_t timerPurpose_;
     uint8_t arduinoPin_;

@@ -10,7 +10,11 @@
 
 namespace jacdac {
 
-enum TimerPurpose : uint8_t { TIMER_NONE, TIMER_TRANSMIT, TIMER_RX_HEADER, TIMER_RX_FRAME
+enum TimerPurpose : uint8_t {
+    TIMER_NONE,
+    TIMER_TRANSMIT,
+    TIMER_RX_HEADER,
+    TIMER_RX_FRAME
 #if defined(NRF51)
     , TIMER_TX_END
 #endif

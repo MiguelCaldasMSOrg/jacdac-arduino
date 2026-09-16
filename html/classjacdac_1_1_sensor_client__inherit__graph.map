@@ -1,0 +1,23 @@
+<map id="jacdac::SensorClient" name="jacdac::SensorClient">
+<area shape="rect" id="Node000001" title=" " alt="" coords="199,208,341,235"/>
+<area shape="rect" id="Node000003" href="$classjacdac_1_1_accelerometer_client.html" title=" " alt="" coords="390,5,576,32"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="280,193,296,158,319,117,350,77,387,42,412,31,408,34,391,46,354,80,324,120,300,161,284,196"/>
+<area shape="rect" id="Node000004" href="$classjacdac_1_1_button_client.html" title=" " alt="" coords="414,56,553,83"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="287,193,328,142,356,115,388,92,416,82,411,85,390,97,360,119,332,146,291,197"/>
+<area shape="rect" id="Node000005" href="$classjacdac_1_1_distance_client.html" title=" " alt="" coords="406,107,560,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="300,196,340,169,388,143,423,133,418,135,390,148,343,173,303,200"/>
+<area shape="rect" id="Node000006" href="$classjacdac_1_1_humidity_client.html" title=" " alt="" coords="406,157,560,184"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="343,201,426,183,422,186,345,206"/>
+<area shape="rect" id="Node000007" href="$classjacdac_1_1_light_level_client.html" title=" " alt="" coords="403,208,563,235"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="356,219,405,220,400,222,357,224"/>
+<area shape="rect" id="Node000008" href="$classjacdac_1_1_magnetic_field_level_client.html" title=" " alt="" coords="394,259,573,301"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="335,237,406,257,400,259,336,242"/>
+<area shape="rect" id="Node000009" href="$classjacdac_1_1_potentiometer_client.html" title=" " alt="" coords="392,325,574,352"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="296,243,339,278,390,311,420,325,415,325,388,316,336,283,295,248"/>
+<area shape="rect" id="Node000010" href="$classjacdac_1_1_rotary_encoder_client.html" title=" " alt="" coords="389,376,577,403"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="287,246,330,305,358,336,390,362,415,376,410,375,388,366,354,340,326,309,285,251"/>
+<area shape="rect" id="Node000011" href="$classjacdac_1_1_temperature_client.html" title=" " alt="" coords="396,427,570,453"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="282,247,298,286,321,330,352,375,391,413,412,427,407,426,387,417,348,378,317,333,294,288,279,252"/>
+<area shape="rect" id="Node000002" href="$classjacdac_1_1_service_client.html" title=" " alt="" coords="5,208,151,235"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,219,200,220,196,223,167,224"/>
+</map>

@@ -1,0 +1,59 @@
+\doxysection{jacdac::Service\+Client Class Reference}
+\hypertarget{classjacdac_1_1_service_client}{}\label{classjacdac_1_1_service_client}\index{jacdac::ServiceClient@{jacdac::ServiceClient}}
+
+
+Inheritance diagram for jacdac::Service\+Client:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classjacdac_1_1_service_client__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for jacdac::Service\+Client:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=282pt]{classjacdac_1_1_service_client__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classjacdac_1_1_service_client_a17440d49f594cfd487148e5767e4eb64}\label{classjacdac_1_1_service_client_a17440d49f594cfd487148e5767e4eb64} 
+{\bfseries Service\+Client} (\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \&bus, uint32\+\_\+t service\+Class, uint8\+\_\+t instance=0)
+\item 
+\Hypertarget{classjacdac_1_1_service_client_aff5bb65cba328c5568a1e57591dcfe15}\label{classjacdac_1_1_service_client_aff5bb65cba328c5568a1e57591dcfe15} 
+bool {\bfseries connected} () const
+\item 
+\Hypertarget{classjacdac_1_1_service_client_a66bbb3eb0ca836b78c272cc91c13cf8c}\label{classjacdac_1_1_service_client_a66bbb3eb0ca836b78c272cc91c13cf8c} 
+\doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} {\bfseries resolve} () const
+\item 
+\Hypertarget{classjacdac_1_1_service_client_a4e1aea030f7fc9e63ea4b774aba7122e}\label{classjacdac_1_1_service_client_a4e1aea030f7fc9e63ea4b774aba7122e} 
+bool {\bfseries bind} (const \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} \&service)
+\item 
+\Hypertarget{classjacdac_1_1_service_client_a613d39caf69696c896d2c6bdcb202615}\label{classjacdac_1_1_service_client_a613d39caf69696c896d2c6bdcb202615} 
+void {\bfseries clear\+Binding} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classjacdac_1_1_service_client_a3c72b134c286fa5a17ef5fc2ace0c1ef}\label{classjacdac_1_1_service_client_a3c72b134c286fa5a17ef5fc2ace0c1ef} 
+bool {\bfseries fail} (Error error) const
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classjacdac_1_1_service_client_ab6cdd8ff25d94ce7389f313edc5da3f5}\label{classjacdac_1_1_service_client_ab6cdd8ff25d94ce7389f313edc5da3f5} 
+\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \& {\bfseries bus\_}
+\item 
+\Hypertarget{classjacdac_1_1_service_client_a81f8c76becc9ab274afba4f7a6c50ed6}\label{classjacdac_1_1_service_client_a81f8c76becc9ab274afba4f7a6c50ed6} 
+\doxymbox{\hyperlink{structjacdac_1_1_service_binding}{Service\+Binding}} {\bfseries binding\_}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+src/Jacdac.\+h\item 
+src/Jacdac\+Clients.\+cpp\end{DoxyCompactItemize}

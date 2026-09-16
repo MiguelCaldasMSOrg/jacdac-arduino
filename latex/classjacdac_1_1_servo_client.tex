@@ -1,0 +1,82 @@
+\doxysection{jacdac::Servo\+Client Class Reference}
+\hypertarget{classjacdac_1_1_servo_client}{}\label{classjacdac_1_1_servo_client}\index{jacdac::ServoClient@{jacdac::ServoClient}}
+
+
+Inheritance diagram for jacdac::Servo\+Client:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=189pt]{classjacdac_1_1_servo_client__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for jacdac::Servo\+Client:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=282pt]{classjacdac_1_1_servo_client__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classjacdac_1_1_servo_client_a2232870f575979df0dba02797cd80116}\label{classjacdac_1_1_servo_client_a2232870f575979df0dba02797cd80116} 
+{\bfseries Servo\+Client} (\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \&bus, uint8\+\_\+t instance=0)
+\item 
+\Hypertarget{classjacdac_1_1_servo_client_a2656320b480c550267d0e56101857be6}\label{classjacdac_1_1_servo_client_a2656320b480c550267d0e56101857be6} 
+bool {\bfseries set\+Angle} (float angle\+Degrees, bool request\+Ack=false) const
+\item 
+\Hypertarget{classjacdac_1_1_servo_client_a719fca758efa46f9acd7dba10ad918bb}\label{classjacdac_1_1_servo_client_a719fca758efa46f9acd7dba10ad918bb} 
+bool {\bfseries set\+Angle\+Q16} (int32\+\_\+t angle\+Degrees\+Q16, bool request\+Ack=false) const
+\item 
+\Hypertarget{classjacdac_1_1_servo_client_a44c752fdc30e5b9e2d39fe9a8e0a64a4}\label{classjacdac_1_1_servo_client_a44c752fdc30e5b9e2d39fe9a8e0a64a4} 
+bool {\bfseries set\+Enabled} (bool enabled, bool request\+Ack=false) const
+\item 
+\Hypertarget{classjacdac_1_1_servo_client_a715bccb15936c01c9487d555a9d0c91f}\label{classjacdac_1_1_servo_client_a715bccb15936c01c9487d555a9d0c91f} 
+bool {\bfseries request\+Angle} () const
+\item 
+\Hypertarget{classjacdac_1_1_servo_client_a6901af1b383a794562a482dadeca8bb0}\label{classjacdac_1_1_servo_client_a6901af1b383a794562a482dadeca8bb0} 
+bool {\bfseries request\+Enabled} () const
+\item 
+\Hypertarget{classjacdac_1_1_servo_client_a8ba24e772ed92eab61a838a86da12013}\label{classjacdac_1_1_servo_client_a8ba24e772ed92eab61a838a86da12013} 
+bool {\bfseries request\+Min\+Angle} () const
+\item 
+\Hypertarget{classjacdac_1_1_servo_client_ab16c9103e1d768deb056b25468562378}\label{classjacdac_1_1_servo_client_ab16c9103e1d768deb056b25468562378} 
+bool {\bfseries request\+Max\+Angle} () const
+\item 
+\Hypertarget{classjacdac_1_1_servo_client_a782080d04204ed32e1d74aafe943808b}\label{classjacdac_1_1_servo_client_a782080d04204ed32e1d74aafe943808b} 
+bool {\bfseries request\+Actual\+Angle} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Service\+Client} (\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \&bus, uint32\+\_\+t service\+Class, uint8\+\_\+t instance=0)
+\item 
+bool {\bfseries connected} () const
+\item 
+\doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} {\bfseries resolve} () const
+\item 
+bool {\bfseries bind} (const \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} \&service)
+\item 
+void {\bfseries clear\+Binding} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Additional Inherited Members}
+\doxysubsection*{Protected Member Functions inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+bool {\bfseries fail} (Error error) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \& {\bfseries bus\_}
+\item 
+\doxymbox{\hyperlink{structjacdac_1_1_service_binding}{Service\+Binding}} {\bfseries binding\_}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+src/Jacdac.\+h\item 
+src/Jacdac\+Clients.\+cpp\end{DoxyCompactItemize}

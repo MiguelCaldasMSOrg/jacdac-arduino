@@ -1,0 +1,9 @@
+<map id="jacdac::ActuatorClient" name="jacdac::ActuatorClient">
+<area shape="rect" id="Node000001" title=" " alt="" coords="49,180,199,207"/>
+<area shape="rect" id="Node000002" href="$classjacdac_1_1_service_client.html" title=" " alt="" coords="51,104,196,131"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,144,126,181,121,178,122,148"/>
+<area shape="rect" id="Node000003" href="$classjacdac_1_1_bus.html" title=" " alt="" coords="5,5,96,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="70,42,117,103,112,104,68,47"/>
+<area shape="rect" id="Node000004" href="$structjacdac_1_1_service_binding.html" title=" " alt="" coords="120,5,274,32"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="181,43,135,105,131,102,176,46"/>
+</map>

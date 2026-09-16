@@ -1,0 +1,94 @@
+\doxysection{jacdac::Sensor\+Client Class Reference}
+\hypertarget{classjacdac_1_1_sensor_client}{}\label{classjacdac_1_1_sensor_client}\index{jacdac::SensorClient@{jacdac::SensorClient}}
+
+
+Inheritance diagram for jacdac::Sensor\+Client:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classjacdac_1_1_sensor_client__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for jacdac::Sensor\+Client:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=282pt]{classjacdac_1_1_sensor_client__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classjacdac_1_1_sensor_client_a5ddbdfbc55865499a34fd1d0e10c5cb8}\label{classjacdac_1_1_sensor_client_a5ddbdfbc55865499a34fd1d0e10c5cb8} 
+{\bfseries Sensor\+Client} (\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \&bus, uint32\+\_\+t service\+Class, uint8\+\_\+t instance=0)
+\item 
+\Hypertarget{classjacdac_1_1_sensor_client_ab07fc8520329b5df0c78561d4463ee22}\label{classjacdac_1_1_sensor_client_ab07fc8520329b5df0c78561d4463ee22} 
+bool {\bfseries request\+Reading} () const
+\item 
+\Hypertarget{classjacdac_1_1_sensor_client_a4aebffd17262b3648d48e8b0c8afe124}\label{classjacdac_1_1_sensor_client_a4aebffd17262b3648d48e8b0c8afe124} 
+bool {\bfseries set\+Streaming} (uint8\+\_\+t samples=255) const
+\item 
+\Hypertarget{classjacdac_1_1_sensor_client_a069572c94c24158301ea47434f9f5e1b}\label{classjacdac_1_1_sensor_client_a069572c94c24158301ea47434f9f5e1b} 
+bool {\bfseries set\+Streaming\+Interval} (uint32\+\_\+t milliseconds) const
+\item 
+\Hypertarget{classjacdac_1_1_sensor_client_af5d774c5925a8ea51d73006804170bec}\label{classjacdac_1_1_sensor_client_af5d774c5925a8ea51d73006804170bec} 
+bool {\bfseries set\+Reading\+Range} (uint32\+\_\+t range) const
+\item 
+\Hypertarget{classjacdac_1_1_sensor_client_a192fe7b109b47f7f8c1940dfb649304f}\label{classjacdac_1_1_sensor_client_a192fe7b109b47f7f8c1940dfb649304f} 
+bool {\bfseries set\+Inactive\+Threshold} (int32\+\_\+t threshold) const
+\item 
+\Hypertarget{classjacdac_1_1_sensor_client_ac1ae6d693fa1efdeab3192a52a690fe8}\label{classjacdac_1_1_sensor_client_ac1ae6d693fa1efdeab3192a52a690fe8} 
+bool {\bfseries set\+Active\+Threshold} (int32\+\_\+t threshold) const
+\item 
+\Hypertarget{classjacdac_1_1_sensor_client_af5bd5e1cb285bb63efc3a7e742bce202}\label{classjacdac_1_1_sensor_client_af5bd5e1cb285bb63efc3a7e742bce202} 
+bool {\bfseries calibrate} (bool request\+Ack=false) const
+\item 
+\Hypertarget{classjacdac_1_1_sensor_client_accd3ce0adbfc4bb0d7632229e275858f}\label{classjacdac_1_1_sensor_client_accd3ce0adbfc4bb0d7632229e275858f} 
+bool {\bfseries request\+Status} () const
+\item 
+\Hypertarget{classjacdac_1_1_sensor_client_a2f07fe0038307327e8254e67131f2197}\label{classjacdac_1_1_sensor_client_a2f07fe0038307327e8254e67131f2197} 
+bool {\bfseries request\+Preferred\+Streaming\+Interval} () const
+\item 
+\Hypertarget{classjacdac_1_1_sensor_client_abc57d958a16a056914465d3ba7f013cf}\label{classjacdac_1_1_sensor_client_abc57d958a16a056914465d3ba7f013cf} 
+bool {\bfseries request\+Reading\+Resolution} () const
+\item 
+\Hypertarget{classjacdac_1_1_sensor_client_ac5a0e6f92ac522b543f77d5d16337c7d}\label{classjacdac_1_1_sensor_client_ac5a0e6f92ac522b543f77d5d16337c7d} 
+bool {\bfseries request\+Instance\+Name} () const
+\item 
+\Hypertarget{classjacdac_1_1_sensor_client_a3cab50a9fe5397850fc89fedcf0c85e5}\label{classjacdac_1_1_sensor_client_a3cab50a9fe5397850fc89fedcf0c85e5} 
+bool {\bfseries matches\+Reading} (const \doxymbox{\hyperlink{structjacdac_1_1_packet_view}{Packet\+View}} \&packet) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Service\+Client} (\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \&bus, uint32\+\_\+t service\+Class, uint8\+\_\+t instance=0)
+\item 
+bool {\bfseries connected} () const
+\item 
+\doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} {\bfseries resolve} () const
+\item 
+bool {\bfseries bind} (const \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} \&service)
+\item 
+void {\bfseries clear\+Binding} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Additional Inherited Members}
+\doxysubsection*{Protected Member Functions inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+bool {\bfseries fail} (Error error) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \& {\bfseries bus\_}
+\item 
+\doxymbox{\hyperlink{structjacdac_1_1_service_binding}{Service\+Binding}} {\bfseries binding\_}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+src/Jacdac.\+h\item 
+src/Jacdac\+Clients.\+cpp\end{DoxyCompactItemize}

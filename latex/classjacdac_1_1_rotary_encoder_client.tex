@@ -1,0 +1,99 @@
+\doxysection{jacdac::Rotary\+Encoder\+Client Class Reference}
+\hypertarget{classjacdac_1_1_rotary_encoder_client}{}\label{classjacdac_1_1_rotary_encoder_client}\index{jacdac::RotaryEncoderClient@{jacdac::RotaryEncoderClient}}
+
+
+Inheritance diagram for jacdac::Rotary\+Encoder\+Client:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=221pt]{classjacdac_1_1_rotary_encoder_client__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for jacdac::Rotary\+Encoder\+Client:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=282pt]{classjacdac_1_1_rotary_encoder_client__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classjacdac_1_1_rotary_encoder_client_ada2796b73720f23621d488b5cd674cf2}\label{classjacdac_1_1_rotary_encoder_client_ada2796b73720f23621d488b5cd674cf2} 
+{\bfseries Rotary\+Encoder\+Client} (\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \&bus, uint8\+\_\+t instance=0)
+\item 
+\Hypertarget{classjacdac_1_1_rotary_encoder_client_aa1110f8ebe7efea600e6a9d894aa4768}\label{classjacdac_1_1_rotary_encoder_client_aa1110f8ebe7efea600e6a9d894aa4768} 
+bool {\bfseries request\+Position} () const
+\item 
+\Hypertarget{classjacdac_1_1_rotary_encoder_client_a7b24a611a560d36525bb985be0886ff9}\label{classjacdac_1_1_rotary_encoder_client_a7b24a611a560d36525bb985be0886ff9} 
+bool {\bfseries request\+Clicks\+Per\+Turn} () const
+\item 
+\Hypertarget{classjacdac_1_1_rotary_encoder_client_ae46e478a26b2782e1e63af456a920bc1}\label{classjacdac_1_1_rotary_encoder_client_ae46e478a26b2782e1e63af456a920bc1} 
+bool {\bfseries request\+Clicker} () const
+\item 
+\Hypertarget{classjacdac_1_1_rotary_encoder_client_a08f03d732490f532ce0879ca165ff189}\label{classjacdac_1_1_rotary_encoder_client_a08f03d732490f532ce0879ca165ff189} 
+\doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} {\bfseries button\+Service} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \doxymbox{\hyperlink{classjacdac_1_1_sensor_client}{jacdac::\+\+Sensor\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Sensor\+Client} (\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \&bus, uint32\+\_\+t service\+Class, uint8\+\_\+t instance=0)
+\item 
+bool {\bfseries request\+Reading} () const
+\item 
+bool {\bfseries set\+Streaming} (uint8\+\_\+t samples=255) const
+\item 
+bool {\bfseries set\+Streaming\+Interval} (uint32\+\_\+t milliseconds) const
+\item 
+bool {\bfseries set\+Reading\+Range} (uint32\+\_\+t range) const
+\item 
+bool {\bfseries set\+Inactive\+Threshold} (int32\+\_\+t threshold) const
+\item 
+bool {\bfseries set\+Active\+Threshold} (int32\+\_\+t threshold) const
+\item 
+bool {\bfseries calibrate} (bool request\+Ack=false) const
+\item 
+bool {\bfseries request\+Status} () const
+\item 
+bool {\bfseries request\+Preferred\+Streaming\+Interval} () const
+\item 
+bool {\bfseries request\+Reading\+Resolution} () const
+\item 
+bool {\bfseries request\+Instance\+Name} () const
+\item 
+bool {\bfseries matches\+Reading} (const \doxymbox{\hyperlink{structjacdac_1_1_packet_view}{Packet\+View}} \&packet) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Service\+Client} (\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \&bus, uint32\+\_\+t service\+Class, uint8\+\_\+t instance=0)
+\item 
+bool {\bfseries connected} () const
+\item 
+\doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} {\bfseries resolve} () const
+\item 
+bool {\bfseries bind} (const \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} \&service)
+\item 
+void {\bfseries clear\+Binding} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Additional Inherited Members}
+\doxysubsection*{Protected Member Functions inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+bool {\bfseries fail} (Error error) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \& {\bfseries bus\_}
+\item 
+\doxymbox{\hyperlink{structjacdac_1_1_service_binding}{Service\+Binding}} {\bfseries binding\_}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+src/Jacdac.\+h\item 
+src/Jacdac\+Clients.\+cpp\end{DoxyCompactItemize}

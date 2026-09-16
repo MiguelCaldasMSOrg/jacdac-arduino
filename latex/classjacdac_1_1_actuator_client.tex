@@ -1,0 +1,64 @@
+\doxysection{jacdac::Actuator\+Client Class Reference}
+\hypertarget{classjacdac_1_1_actuator_client}{}\label{classjacdac_1_1_actuator_client}\index{jacdac::ActuatorClient@{jacdac::ActuatorClient}}
+
+
+Inheritance diagram for jacdac::Actuator\+Client:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=304pt]{classjacdac_1_1_actuator_client__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for jacdac::Actuator\+Client:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=282pt]{classjacdac_1_1_actuator_client__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classjacdac_1_1_actuator_client_a571c709fb2d6c6f2d35186eacbec09bc}\label{classjacdac_1_1_actuator_client_a571c709fb2d6c6f2d35186eacbec09bc} 
+{\bfseries Actuator\+Client} (\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \&bus, uint32\+\_\+t service\+Class, uint8\+\_\+t instance=0)
+\item 
+\Hypertarget{classjacdac_1_1_actuator_client_a22bac67c8253e8b426afba7d5d0800f2}\label{classjacdac_1_1_actuator_client_a22bac67c8253e8b426afba7d5d0800f2} 
+bool {\bfseries request\+Status} () const
+\item 
+\Hypertarget{classjacdac_1_1_actuator_client_a0eaed93bb3f95e245219134c0c545dfb}\label{classjacdac_1_1_actuator_client_a0eaed93bb3f95e245219134c0c545dfb} 
+bool {\bfseries request\+Instance\+Name} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Service\+Client} (\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \&bus, uint32\+\_\+t service\+Class, uint8\+\_\+t instance=0)
+\item 
+bool {\bfseries connected} () const
+\item 
+\doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} {\bfseries resolve} () const
+\item 
+bool {\bfseries bind} (const \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} \&service)
+\item 
+void {\bfseries clear\+Binding} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Additional Inherited Members}
+\doxysubsection*{Protected Member Functions inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+bool {\bfseries fail} (Error error) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \& {\bfseries bus\_}
+\item 
+\doxymbox{\hyperlink{structjacdac_1_1_service_binding}{Service\+Binding}} {\bfseries binding\_}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+src/Jacdac.\+h\item 
+src/Jacdac\+Clients.\+cpp\end{DoxyCompactItemize}

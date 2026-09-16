@@ -1,0 +1,95 @@
+\doxysection{Jacdac\+Transport.\+h}
+\hypertarget{_jacdac_transport_8h_source}{}\label{_jacdac_transport_8h_source}\index{src/JacdacTransport.h@{src/JacdacTransport.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}JacdacProtocol.h"{}}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{keyword}{namespace\ }jacdac\ \{}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{keyword}{using\ }TransportReceiveHandler\ =\ void\ (*)(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ \&frame,\ \textcolor{keywordtype}{void}\ *context);}
+\DoxyCodeLine{00008\ \textcolor{keyword}{using\ }TransportTransmitHandler\ =\ void\ (*)(\textcolor{keywordtype}{void}\ *context);}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \textcolor{keyword}{struct\ }\doxymbox{\hyperlink{structjacdac_1_1_transport_diagnostics}{TransportDiagnostics}}\ \{}
+\DoxyCodeLine{00011\ \ \ \ \ \textcolor{keyword}{volatile}\ uint32\_t\ fallingEdges;}
+\DoxyCodeLine{00012\ \ \ \ \ \textcolor{keyword}{volatile}\ uint32\_t\ receiveStarts;}
+\DoxyCodeLine{00013\ \ \ \ \ \textcolor{keyword}{volatile}\ uint32\_t\ receiveCompletions;}
+\DoxyCodeLine{00014\ \ \ \ \ \textcolor{keyword}{volatile}\ uint32\_t\ receiveBytes;}
+\DoxyCodeLine{00015\ \ \ \ \ \textcolor{keyword}{volatile}\ uint32\_t\ receiveTimeouts;}
+\DoxyCodeLine{00016\ \ \ \ \ \textcolor{keyword}{volatile}\ uint32\_t\ receiveShortFrames;}
+\DoxyCodeLine{00017\ \ \ \ \ \textcolor{keyword}{volatile}\ uint32\_t\ receiveInvalidFrames;}
+\DoxyCodeLine{00018\ \ \ \ \ \textcolor{keyword}{volatile}\ uint32\_t\ receiveHardwareErrors;}
+\DoxyCodeLine{00019\ \};}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \textcolor{keyword}{class\ }NrfTransport\ \{}
+\DoxyCodeLine{00022\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00023\ \ \ \ \ \textcolor{keyword}{static}\ NrfTransport\ \&instance();}
+\DoxyCodeLine{00024\ \ \ \ \ \textcolor{keywordtype}{bool}\ begin(uint8\_t\ pin,\ TransportReceiveHandler\ receiveHandler,\ TransportTransmitHandler\ transmitHandler,\ \textcolor{keywordtype}{void}\ *context);}
+\DoxyCodeLine{00025\ \ \ \ \ \textcolor{keywordtype}{void}\ end();}
+\DoxyCodeLine{00026\ \ \ \ \ \textcolor{keywordtype}{bool}\ send(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ \&frame);}
+\DoxyCodeLine{00027\ \ \ \ \ uint64\_t\ deviceIdentifier()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00028\ \ \ \ \ uint32\_t\ busErrors()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00029\ \ \ \ \ uint32\_t\ collisions()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00030\ \ \ \ \ \textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_transport_diagnostics}{TransportDiagnostics}}\ \&diagnostics()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \ \ \ \ \textcolor{keywordtype}{void}\ handleLineFalling();}
+\DoxyCodeLine{00033\ \ \ \ \ \textcolor{keywordtype}{void}\ handleTimer();}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#if\ defined(NRF52833\_XXAA)}}
+\DoxyCodeLine{00035\ \ \ \ \ \textcolor{keywordtype}{void}\ handleUarte();}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#elif\ defined(NRF51)}}
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{keywordtype}{void}\ handleUart();}
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\#if\ defined(JACDAC\_TEST)}}
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{keywordtype}{void}\ injectFrame(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ \&frame);}
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{keywordtype}{bool}\ takeSentFrame(\doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ \&frame);}
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keywordtype}{void}\ completeTransmit();}
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00046\ \ \ \ \ NrfTransport();}
+\DoxyCodeLine{00047\ \ \ \ \ \textcolor{keywordtype}{void}\ schedule(uint32\_t\ microseconds);}
+\DoxyCodeLine{00048\ \ \ \ \ \textcolor{keywordtype}{void}\ cancelSchedule();}
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keywordtype}{void}\ scheduleTransmit();}
+\DoxyCodeLine{00050\ \ \ \ \ \textcolor{keywordtype}{void}\ startTransmit();}
+\DoxyCodeLine{00051\ \ \ \ \ \textcolor{keywordtype}{void}\ startReceive();}
+\DoxyCodeLine{00052\ \ \ \ \ \textcolor{keywordtype}{void}\ finishReceive(\textcolor{keywordtype}{bool}\ timeout);}
+\DoxyCodeLine{00053\ \textcolor{preprocessor}{\#if\ defined(NRF52833\_XXAA)}}
+\DoxyCodeLine{00054\ \ \ \ \ \textcolor{keywordtype}{void}\ completeReceive();}
+\DoxyCodeLine{00055\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00056\ \ \ \ \ \textcolor{keywordtype}{void}\ finishTransmit();}
+\DoxyCodeLine{00057\ \ \ \ \ \textcolor{keywordtype}{void}\ configureInput();}
+\DoxyCodeLine{00058\ \ \ \ \ \textcolor{keywordtype}{void}\ configureUarteReceive();}
+\DoxyCodeLine{00059\ \ \ \ \ \textcolor{keywordtype}{void}\ configureUarteTransmit();}
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keywordtype}{bool}\ lineHigh()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00061\ \ \ \ \ \textcolor{keywordtype}{void}\ driveLine(\textcolor{keywordtype}{bool}\ high);}
+\DoxyCodeLine{00062\ \ \ \ \ uint32\_t\ randomAround(uint32\_t\ value);}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \ \ \ \ \textcolor{keyword}{enum}\ State:\ uint8\_t\ \{\ STOPPED,\ IDLE,\ WAITING\_TO\_TRANSMIT,\ RECEIVING,\ STOPPING\_RECEIVE,\ TRANSMITTING\ \};}
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keyword}{volatile}\ State\ state\_;}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keyword}{volatile}\ uint8\_t\ timerPurpose\_;}
+\DoxyCodeLine{00067\ \ \ \ \ uint8\_t\ arduinoPin\_;}
+\DoxyCodeLine{00068\ \ \ \ \ uint32\_t\ gpioPin\_;}
+\DoxyCodeLine{00069\ \ \ \ \ \doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ receiveFrame\_;}
+\DoxyCodeLine{00070\ \ \ \ \ \doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ transmitFrame\_;}
+\DoxyCodeLine{00071\ \ \ \ \ \textcolor{keyword}{volatile}\ \textcolor{keywordtype}{bool}\ transmitPending\_;}
+\DoxyCodeLine{00072\ \ \ \ \ \textcolor{keyword}{volatile}\ \textcolor{keywordtype}{bool}\ receiveHadHardwareError\_;}
+\DoxyCodeLine{00073\ \textcolor{preprocessor}{\#if\ defined(NRF52833\_XXAA)}}
+\DoxyCodeLine{00074\ \ \ \ \ \textcolor{keyword}{volatile}\ \textcolor{keywordtype}{bool}\ receiveTimedOut\_;}
+\DoxyCodeLine{00075\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00076\ \textcolor{preprocessor}{\#if\ defined(NRF51)}}
+\DoxyCodeLine{00077\ \ \ \ \ \textcolor{keyword}{volatile}\ \textcolor{keywordtype}{size\_t}\ receiveLength\_;}
+\DoxyCodeLine{00078\ \ \ \ \ \textcolor{keyword}{volatile}\ \textcolor{keywordtype}{size\_t}\ transmitOffset\_;}
+\DoxyCodeLine{00079\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00080\ \ \ \ \ TransportReceiveHandler\ receiveHandler\_;}
+\DoxyCodeLine{00081\ \ \ \ \ TransportTransmitHandler\ transmitHandler\_;}
+\DoxyCodeLine{00082\ \ \ \ \ \textcolor{keywordtype}{void}\ *context\_;}
+\DoxyCodeLine{00083\ \ \ \ \ uint32\_t\ randomState\_;}
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{keyword}{volatile}\ uint32\_t\ busErrors\_;}
+\DoxyCodeLine{00085\ \ \ \ \ \textcolor{keyword}{volatile}\ uint32\_t\ collisions\_;}
+\DoxyCodeLine{00086\ \ \ \ \ \doxymbox{\hyperlink{structjacdac_1_1_transport_diagnostics}{TransportDiagnostics}}\ diagnostics\_;}
+\DoxyCodeLine{00087\ \};}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \}\ \textcolor{comment}{//\ namespace\ jacdac}}
+
+\end{DoxyCode}

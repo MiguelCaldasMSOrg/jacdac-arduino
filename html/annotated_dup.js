@@ -1,0 +1,35 @@
+var annotated_dup =
+[
+    [ "jacdac", null, [
+      [ "AccelerometerClient", "classjacdac_1_1_accelerometer_client.html", null ],
+      [ "ActuatorClient", "classjacdac_1_1_actuator_client.html", null ],
+      [ "Bus", "classjacdac_1_1_bus.html", null ],
+      [ "ButtonClient", "classjacdac_1_1_button_client.html", null ],
+      [ "CommandBatch", "classjacdac_1_1_command_batch.html", null ],
+      [ "Device", "structjacdac_1_1_device.html", null ],
+      [ "Diagnostics", "structjacdac_1_1_diagnostics.html", null ],
+      [ "DistanceClient", "classjacdac_1_1_distance_client.html", null ],
+      [ "Frame", "structjacdac_1_1_frame.html", null ],
+      [ "HumidityClient", "classjacdac_1_1_humidity_client.html", null ],
+      [ "LedClient", "classjacdac_1_1_led_client.html", null ],
+      [ "LedStripClient", "classjacdac_1_1_led_strip_client.html", null ],
+      [ "LightLevelClient", "classjacdac_1_1_light_level_client.html", null ],
+      [ "MagneticFieldLevelClient", "classjacdac_1_1_magnetic_field_level_client.html", null ],
+      [ "NrfTransport", "classjacdac_1_1_nrf_transport.html", null ],
+      [ "PacketHeader", "structjacdac_1_1_packet_header.html", null ],
+      [ "PacketView", "structjacdac_1_1_packet_view.html", null ],
+      [ "PotentiometerClient", "classjacdac_1_1_potentiometer_client.html", null ],
+      [ "PowerClient", "classjacdac_1_1_power_client.html", null ],
+      [ "RelayClient", "classjacdac_1_1_relay_client.html", null ],
+      [ "RotaryEncoderClient", "classjacdac_1_1_rotary_encoder_client.html", null ],
+      [ "SensorClient", "classjacdac_1_1_sensor_client.html", null ],
+      [ "Service", "structjacdac_1_1_service.html", null ],
+      [ "ServiceBinding", "structjacdac_1_1_service_binding.html", null ],
+      [ "ServiceClient", "classjacdac_1_1_service_client.html", null ],
+      [ "ServoClient", "classjacdac_1_1_servo_client.html", null ],
+      [ "TemperatureClient", "classjacdac_1_1_temperature_client.html", null ],
+      [ "TransportDiagnostics", "structjacdac_1_1_transport_diagnostics.html", null ],
+      [ "VibrationMotorClient", "classjacdac_1_1_vibration_motor_client.html", null ],
+      [ "VibrationStep", "structjacdac_1_1_vibration_step.html", null ]
+    ] ]
+];

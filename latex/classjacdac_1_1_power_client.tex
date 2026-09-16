@@ -1,0 +1,103 @@
+\doxysection{jacdac::Power\+Client Class Reference}
+\hypertarget{classjacdac_1_1_power_client}{}\label{classjacdac_1_1_power_client}\index{jacdac::PowerClient@{jacdac::PowerClient}}
+
+
+Inheritance diagram for jacdac::Power\+Client:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=193pt]{classjacdac_1_1_power_client__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for jacdac::Power\+Client:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=282pt]{classjacdac_1_1_power_client__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classjacdac_1_1_power_client_ab40b12ca3a77e0b8d85a6bb372e5e500}\label{classjacdac_1_1_power_client_ab40b12ca3a77e0b8d85a6bb372e5e500} 
+{\bfseries Power\+Client} (\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \&bus, uint8\+\_\+t instance=0)
+\item 
+\Hypertarget{classjacdac_1_1_power_client_ab83178a956af5a8d26b3c1af4a3019de}\label{classjacdac_1_1_power_client_ab83178a956af5a8d26b3c1af4a3019de} 
+bool {\bfseries set\+Allowed} (bool allowed, bool request\+Ack=false) const
+\item 
+\Hypertarget{classjacdac_1_1_power_client_acdc6a38413dbc00033206f51b60f0c79}\label{classjacdac_1_1_power_client_acdc6a38413dbc00033206f51b60f0c79} 
+bool {\bfseries set\+Max\+Power} (uint16\+\_\+t milliamps, bool request\+Ack=false) const
+\item 
+\Hypertarget{classjacdac_1_1_power_client_a55c2a63595aba114398bf2bf6e8a44e8}\label{classjacdac_1_1_power_client_a55c2a63595aba114398bf2bf6e8a44e8} 
+bool {\bfseries set\+Keep\+On\+Pulse} (uint16\+\_\+t duration\+Milliseconds, uint16\+\_\+t period\+Milliseconds, bool request\+Ack=false) const
+\item 
+\Hypertarget{classjacdac_1_1_power_client_a8bfeda629f63880393974e1204527f70}\label{classjacdac_1_1_power_client_a8bfeda629f63880393974e1204527f70} 
+bool {\bfseries request\+Allowed} () const
+\item 
+\Hypertarget{classjacdac_1_1_power_client_a96191402a2d55615c275340319db401d}\label{classjacdac_1_1_power_client_a96191402a2d55615c275340319db401d} 
+bool {\bfseries request\+Max\+Power} () const
+\item 
+\Hypertarget{classjacdac_1_1_power_client_a66a4b8b83ff4491647c65d5045a8239a}\label{classjacdac_1_1_power_client_a66a4b8b83ff4491647c65d5045a8239a} 
+bool {\bfseries request\+Current\+Draw} () const
+\item 
+\Hypertarget{classjacdac_1_1_power_client_a2bb648c4ff96119dffb0092c4dee2c92}\label{classjacdac_1_1_power_client_a2bb648c4ff96119dffb0092c4dee2c92} 
+bool {\bfseries request\+Battery\+Voltage} () const
+\item 
+\Hypertarget{classjacdac_1_1_power_client_a2c2bfad747e5112907f56ff901f447d0}\label{classjacdac_1_1_power_client_a2c2bfad747e5112907f56ff901f447d0} 
+bool {\bfseries request\+Power\+Status} () const
+\item 
+\Hypertarget{classjacdac_1_1_power_client_a81094a2445cff36ab98634b987cd4bed}\label{classjacdac_1_1_power_client_a81094a2445cff36ab98634b987cd4bed} 
+bool {\bfseries request\+Battery\+Charge} () const
+\item 
+\Hypertarget{classjacdac_1_1_power_client_aa28ca215ad4130cfe964cae4d6a7eac0}\label{classjacdac_1_1_power_client_aa28ca215ad4130cfe964cae4d6a7eac0} 
+bool {\bfseries request\+Battery\+Capacity} () const
+\item 
+\Hypertarget{classjacdac_1_1_power_client_a874f4eaad819bcd6a0dfc80c1e85cbac}\label{classjacdac_1_1_power_client_a874f4eaad819bcd6a0dfc80c1e85cbac} 
+bool {\bfseries request\+Keep\+On\+Pulse\+Duration} () const
+\item 
+\Hypertarget{classjacdac_1_1_power_client_a62c3ff44ae712d23e0b13865b1cd76ff}\label{classjacdac_1_1_power_client_a62c3ff44ae712d23e0b13865b1cd76ff} 
+bool {\bfseries request\+Keep\+On\+Pulse\+Period} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \doxymbox{\hyperlink{classjacdac_1_1_actuator_client}{jacdac::\+\+Actuator\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Actuator\+Client} (\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \&bus, uint32\+\_\+t service\+Class, uint8\+\_\+t instance=0)
+\item 
+bool {\bfseries request\+Status} () const
+\item 
+bool {\bfseries request\+Instance\+Name} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Service\+Client} (\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \&bus, uint32\+\_\+t service\+Class, uint8\+\_\+t instance=0)
+\item 
+bool {\bfseries connected} () const
+\item 
+\doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} {\bfseries resolve} () const
+\item 
+bool {\bfseries bind} (const \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} \&service)
+\item 
+void {\bfseries clear\+Binding} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Additional Inherited Members}
+\doxysubsection*{Protected Member Functions inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+bool {\bfseries fail} (Error error) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \& {\bfseries bus\_}
+\item 
+\doxymbox{\hyperlink{structjacdac_1_1_service_binding}{Service\+Binding}} {\bfseries binding\_}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+src/Jacdac.\+h\item 
+src/Jacdac\+Clients.\+cpp\end{DoxyCompactItemize}

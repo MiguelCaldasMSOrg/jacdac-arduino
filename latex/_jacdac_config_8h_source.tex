@@ -1,0 +1,63 @@
+\doxysection{Jacdac\+Config.\+h}
+\hypertarget{_jacdac_config_8h_source}{}\label{_jacdac_config_8h_source}\index{src/JacdacConfig.h@{src/JacdacConfig.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#ifndef\ JACDAC\_MAX\_DEVICES}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#if\ defined(NRF52833\_XXAA)}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#define\ JACDAC\_MAX\_DEVICES\ 32}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#elif\ defined(NRF51)}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#define\ JACDAC\_MAX\_DEVICES\ 16}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#define\ JACDAC\_MAX\_DEVICES\ 8}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#ifndef\ JACDAC\_MAX\_SERVICES\_PER\_DEVICE}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#define\ JACDAC\_MAX\_SERVICES\_PER\_DEVICE\ 16}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#ifndef\ JACDAC\_RX\_QUEUE\_SIZE}}
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#define\ JACDAC\_RX\_QUEUE\_SIZE\ 4}}
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00018\ \textcolor{preprocessor}{\#ifndef\ JACDAC\_TX\_QUEUE\_SIZE}}
+\DoxyCodeLine{00019\ \textcolor{preprocessor}{\#define\ JACDAC\_TX\_QUEUE\_SIZE\ 4}}
+\DoxyCodeLine{00020\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#ifndef\ JACDAC\_MAX\_ACK\_REQUESTS}}
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\#define\ JACDAC\_MAX\_ACK\_REQUESTS\ 4}}
+\DoxyCodeLine{00023\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifndef\ JACDAC\_MAX\_REGISTER\_REQUESTS}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ JACDAC\_MAX\_REGISTER\_REQUESTS\ 4}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#ifndef\ JACDAC\_MAX\_SUBSCRIBERS}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#define\ JACDAC\_MAX\_SUBSCRIBERS\ 6}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#ifndef\ JACDAC\_FRAME\_DATA\_SIZE}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#define\ JACDAC\_FRAME\_DATA\_SIZE\ 240}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#if\ JACDAC\_MAX\_DEVICES\ <\ 1\ ||\ JACDAC\_MAX\_DEVICES\ >\ 254}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#error\ "{}JACDAC\_MAX\_DEVICES\ must\ be\ between\ 1\ and\ 254"{}}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#if\ JACDAC\_MAX\_SERVICES\_PER\_DEVICE\ <\ 1\ ||\ JACDAC\_MAX\_SERVICES\_PER\_DEVICE\ >\ 58}}
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#error\ "{}JACDAC\_MAX\_SERVICES\_PER\_DEVICE\ must\ be\ between\ 1\ and\ 58"{}}}
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#if\ JACDAC\_RX\_QUEUE\_SIZE\ <\ 1\ ||\ JACDAC\_RX\_QUEUE\_SIZE\ >\ 254}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#error\ "{}JACDAC\_RX\_QUEUE\_SIZE\ must\ be\ between\ 1\ and\ 254"{}}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\#if\ JACDAC\_TX\_QUEUE\_SIZE\ <\ 1\ ||\ JACDAC\_TX\_QUEUE\_SIZE\ >\ 254}}
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#error\ "{}JACDAC\_TX\_QUEUE\_SIZE\ must\ be\ between\ 1\ and\ 254"{}}}
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#if\ JACDAC\_MAX\_ACK\_REQUESTS\ <\ 1\ ||\ JACDAC\_MAX\_ACK\_REQUESTS\ >\ 254}}
+\DoxyCodeLine{00047\ \textcolor{preprocessor}{\#error\ "{}JACDAC\_MAX\_ACK\_REQUESTS\ must\ be\ between\ 1\ and\ 254"{}}}
+\DoxyCodeLine{00048\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00049\ \textcolor{preprocessor}{\#if\ JACDAC\_MAX\_REGISTER\_REQUESTS\ <\ 1\ ||\ JACDAC\_MAX\_REGISTER\_REQUESTS\ >\ 254}}
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\#error\ "{}JACDAC\_MAX\_REGISTER\_REQUESTS\ must\ be\ between\ 1\ and\ 254"{}}}
+\DoxyCodeLine{00051\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00052\ \textcolor{preprocessor}{\#if\ JACDAC\_MAX\_SUBSCRIBERS\ <\ 1\ ||\ JACDAC\_MAX\_SUBSCRIBERS\ >\ 254}}
+\DoxyCodeLine{00053\ \textcolor{preprocessor}{\#error\ "{}JACDAC\_MAX\_SUBSCRIBERS\ must\ be\ between\ 1\ and\ 254"{}}}
+\DoxyCodeLine{00054\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00055\ \textcolor{preprocessor}{\#if\ JACDAC\_FRAME\_DATA\_SIZE\ <\ 8\ ||\ JACDAC\_FRAME\_DATA\_SIZE\ >\ 240\ ||\ (JACDAC\_FRAME\_DATA\_SIZE\ \%\ 4)\ !=\ 0}}
+\DoxyCodeLine{00056\ \textcolor{preprocessor}{\#error\ "{}JACDAC\_FRAME\_DATA\_SIZE\ must\ be\ a\ multiple\ of\ 4\ between\ 8\ and\ 240"{}}}
+\DoxyCodeLine{00057\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

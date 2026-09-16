@@ -1,0 +1,91 @@
+\doxysection{jacdac::Led\+Strip\+Client Class Reference}
+\hypertarget{classjacdac_1_1_led_strip_client}{}\label{classjacdac_1_1_led_strip_client}\index{jacdac::LedStripClient@{jacdac::LedStripClient}}
+
+
+Inheritance diagram for jacdac::Led\+Strip\+Client:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=192pt]{classjacdac_1_1_led_strip_client__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for jacdac::Led\+Strip\+Client:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=282pt]{classjacdac_1_1_led_strip_client__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classjacdac_1_1_led_strip_client_a44e051869676468dd53b3869f381ec67}\label{classjacdac_1_1_led_strip_client_a44e051869676468dd53b3869f381ec67} 
+{\bfseries Led\+Strip\+Client} (\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \&bus, uint8\+\_\+t instance=0)
+\item 
+\Hypertarget{classjacdac_1_1_led_strip_client_aa42211fa300675bae239e0cb6087e705}\label{classjacdac_1_1_led_strip_client_aa42211fa300675bae239e0cb6087e705} 
+bool {\bfseries set\+Brightness} (uint8\+\_\+t brightness, bool request\+Ack=false) const
+\item 
+\Hypertarget{classjacdac_1_1_led_strip_client_a59285f86a7313cfd8760f65e42571eba}\label{classjacdac_1_1_led_strip_client_a59285f86a7313cfd8760f65e42571eba} 
+bool {\bfseries set\+Num\+Pixels} (uint16\+\_\+t num\+Pixels, bool request\+Ack=false) const
+\item 
+\Hypertarget{classjacdac_1_1_led_strip_client_a46749e90f22ab4c16a2d436f8b05fbbe}\label{classjacdac_1_1_led_strip_client_a46749e90f22ab4c16a2d436f8b05fbbe} 
+bool {\bfseries set\+Max\+Power} (uint16\+\_\+t milliamps, bool request\+Ack=false) const
+\item 
+\Hypertarget{classjacdac_1_1_led_strip_client_a08d6e4f9d9279c4502527f7fa416aaac}\label{classjacdac_1_1_led_strip_client_a08d6e4f9d9279c4502527f7fa416aaac} 
+bool {\bfseries set\+Num\+Repeats} (uint16\+\_\+t repeats, bool request\+Ack=false) const
+\item 
+\Hypertarget{classjacdac_1_1_led_strip_client_a70a3a1286910ce40d4dc1324b05faefc}\label{classjacdac_1_1_led_strip_client_a70a3a1286910ce40d4dc1324b05faefc} 
+bool {\bfseries request\+Actual\+Brightness} () const
+\item 
+\Hypertarget{classjacdac_1_1_led_strip_client_ade8b20e0b530f80d84fed45ceaaf95de}\label{classjacdac_1_1_led_strip_client_ade8b20e0b530f80d84fed45ceaaf95de} 
+bool {\bfseries request\+Num\+Pixels} () const
+\item 
+\Hypertarget{classjacdac_1_1_led_strip_client_a8e0fbf5922ffd439497a12945339c806}\label{classjacdac_1_1_led_strip_client_a8e0fbf5922ffd439497a12945339c806} 
+bool {\bfseries request\+Max\+Pixels} () const
+\item 
+\Hypertarget{classjacdac_1_1_led_strip_client_a2acd75c65e33b7b011301e28b39bac4c}\label{classjacdac_1_1_led_strip_client_a2acd75c65e33b7b011301e28b39bac4c} 
+bool {\bfseries request\+Variant} () const
+\item 
+\Hypertarget{classjacdac_1_1_led_strip_client_aa57cf9ee7e0da28808a2ec30bbe16485}\label{classjacdac_1_1_led_strip_client_aa57cf9ee7e0da28808a2ec30bbe16485} 
+bool {\bfseries run\+Program} (const uint8\+\_\+t \texorpdfstring{$\ast$}{*}program, uint8\+\_\+t size, bool request\+Ack=false) const
+\item 
+\Hypertarget{classjacdac_1_1_led_strip_client_a45ba60eb7d4d03a67543f992997ec7f8}\label{classjacdac_1_1_led_strip_client_a45ba60eb7d4d03a67543f992997ec7f8} 
+bool {\bfseries set\+All} (uint8\+\_\+t red, uint8\+\_\+t green, uint8\+\_\+t blue, bool request\+Ack=false) const
+\item 
+\Hypertarget{classjacdac_1_1_led_strip_client_a6c9e57a3a8ad47d17f0911ab93dafae7}\label{classjacdac_1_1_led_strip_client_a6c9e57a3a8ad47d17f0911ab93dafae7} 
+bool {\bfseries set\+Pixel} (uint16\+\_\+t pixel, uint8\+\_\+t red, uint8\+\_\+t green, uint8\+\_\+t blue, bool request\+Ack=false) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Service\+Client} (\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \&bus, uint32\+\_\+t service\+Class, uint8\+\_\+t instance=0)
+\item 
+bool {\bfseries connected} () const
+\item 
+\doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} {\bfseries resolve} () const
+\item 
+bool {\bfseries bind} (const \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} \&service)
+\item 
+void {\bfseries clear\+Binding} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Additional Inherited Members}
+\doxysubsection*{Protected Member Functions inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+bool {\bfseries fail} (Error error) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes inherited from \doxymbox{\hyperlink{classjacdac_1_1_service_client}{jacdac::\+\+Service\+Client}}}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}} \& {\bfseries bus\_}
+\item 
+\doxymbox{\hyperlink{structjacdac_1_1_service_binding}{Service\+Binding}} {\bfseries binding\_}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+src/Jacdac.\+h\item 
+src/Jacdac\+Clients.\+cpp\end{DoxyCompactItemize}

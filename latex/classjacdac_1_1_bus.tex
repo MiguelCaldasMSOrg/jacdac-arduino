@@ -1,0 +1,125 @@
+\doxysection{jacdac::Bus Class Reference}
+\hypertarget{classjacdac_1_1_bus}{}\label{classjacdac_1_1_bus}\index{jacdac::Bus@{jacdac::Bus}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classjacdac_1_1_bus_a66efa08fb16076bbeeb1d78fde2725f6}\label{classjacdac_1_1_bus_a66efa08fb16076bbeeb1d78fde2725f6} 
+{\bfseries Bus} (const Bus \&)=delete
+\item 
+\Hypertarget{classjacdac_1_1_bus_afdfb5377f4cfa5c391a4fb071a1e096c}\label{classjacdac_1_1_bus_afdfb5377f4cfa5c391a4fb071a1e096c} 
+Bus \& {\bfseries operator=} (const Bus \&)=delete
+\item 
+\Hypertarget{classjacdac_1_1_bus_a1ceac3a384a932e9db5b66d9d4148640}\label{classjacdac_1_1_bus_a1ceac3a384a932e9db5b66d9d4148640} 
+bool {\bfseries begin} (uint8\+\_\+t pin=12)
+\item 
+\Hypertarget{classjacdac_1_1_bus_a36a6eac7af31e8419fa2e5dd50e6413c}\label{classjacdac_1_1_bus_a36a6eac7af31e8419fa2e5dd50e6413c} 
+void {\bfseries end} ()
+\item 
+\Hypertarget{classjacdac_1_1_bus_a25818ab513078a1ebc6dcb8cb5204f99}\label{classjacdac_1_1_bus_a25818ab513078a1ebc6dcb8cb5204f99} 
+void {\bfseries process} ()
+\item 
+\Hypertarget{classjacdac_1_1_bus_a309c1dd398dd7eaf0d38833e8c1f3bd1}\label{classjacdac_1_1_bus_a309c1dd398dd7eaf0d38833e8c1f3bd1} 
+bool {\bfseries running} () const
+\item 
+\Hypertarget{classjacdac_1_1_bus_a6c8d798de0ac8478273ba07b420bef5b}\label{classjacdac_1_1_bus_a6c8d798de0ac8478273ba07b420bef5b} 
+uint8\+\_\+t {\bfseries device\+Count} () const
+\item 
+\Hypertarget{classjacdac_1_1_bus_afd9084ed2145dca5309ceef46dababfb}\label{classjacdac_1_1_bus_afd9084ed2145dca5309ceef46dababfb} 
+const \doxymbox{\hyperlink{structjacdac_1_1_device}{Device}} \texorpdfstring{$\ast$}{*} {\bfseries device} (uint8\+\_\+t index) const
+\item 
+\Hypertarget{classjacdac_1_1_bus_aa5f15976b007b1734df96e78900d85cf}\label{classjacdac_1_1_bus_aa5f15976b007b1734df96e78900d85cf} 
+\doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} {\bfseries find\+Service} (uint32\+\_\+t service\+Class, uint8\+\_\+t instance=0) const
+\item 
+\Hypertarget{classjacdac_1_1_bus_a3a4553d7d896fe8bc77dd90f4ded0ccd}\label{classjacdac_1_1_bus_a3a4553d7d896fe8bc77dd90f4ded0ccd} 
+\doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} {\bfseries service} (uint64\+\_\+t device\+Identifier, uint8\+\_\+t service\+Index) const
+\item 
+\Hypertarget{classjacdac_1_1_bus_a11c355db767fb7633d54cb41c2deaa55}\label{classjacdac_1_1_bus_a11c355db767fb7633d54cb41c2deaa55} 
+\doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} {\bfseries resolve} (const \doxymbox{\hyperlink{structjacdac_1_1_service_binding}{Service\+Binding}} \&binding) const
+\item 
+\Hypertarget{classjacdac_1_1_bus_aea2c3f501ef9185c7c44039a57933bfe}\label{classjacdac_1_1_bus_aea2c3f501ef9185c7c44039a57933bfe} 
+bool {\bfseries send\+Command} (const \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} \&service, uint16\+\_\+t command, const void \texorpdfstring{$\ast$}{*}data=nullptr, uint8\+\_\+t size=0, bool request\+Ack=false)
+\item 
+\Hypertarget{classjacdac_1_1_bus_a285b57949d43c21f07a4e02cab06f59e}\label{classjacdac_1_1_bus_a285b57949d43c21f07a4e02cab06f59e} 
+bool {\bfseries get\+Register} (const \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} \&service, uint16\+\_\+t reg)
+\item 
+\Hypertarget{classjacdac_1_1_bus_ae72a58d0470a01932a4c3748dc1c6413}\label{classjacdac_1_1_bus_ae72a58d0470a01932a4c3748dc1c6413} 
+bool {\bfseries set\+Register} (const \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} \&service, uint16\+\_\+t reg, const void \texorpdfstring{$\ast$}{*}data, uint8\+\_\+t size, bool request\+Ack=false)
+\item 
+\Hypertarget{classjacdac_1_1_bus_ae4ec21b82ab6d3b42a4922040abb9753}\label{classjacdac_1_1_bus_ae4ec21b82ab6d3b42a4922040abb9753} 
+bool {\bfseries get\+Register\+Async} (const \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} \&service, uint16\+\_\+t reg, Register\+Response\+Handler handler, void \texorpdfstring{$\ast$}{*}context=nullptr, uint32\+\_\+t timeout\+Ms=1000)
+\item 
+\Hypertarget{classjacdac_1_1_bus_ab8795cfbf96ba00d0e63ea0d3329a09b}\label{classjacdac_1_1_bus_ab8795cfbf96ba00d0e63ea0d3329a09b} 
+bool {\bfseries send\+Multicast} (uint32\+\_\+t service\+Class, uint16\+\_\+t command, const void \texorpdfstring{$\ast$}{*}data=nullptr, uint8\+\_\+t size=0)
+\item 
+\Hypertarget{classjacdac_1_1_bus_a939ac0c2efa384b2f916fdf647e7f141}\label{classjacdac_1_1_bus_a939ac0c2efa384b2f916fdf647e7f141} 
+bool {\bfseries send\+Batch} (const \doxymbox{\hyperlink{classjacdac_1_1_command_batch}{Command\+Batch}} \&batch)
+\item 
+\Hypertarget{classjacdac_1_1_bus_ae7da2a939c876e8f2831a340518ba4ec}\label{classjacdac_1_1_bus_ae7da2a939c876e8f2831a340518ba4ec} 
+bool {\bfseries identify} (uint64\+\_\+t device\+Identifier, bool request\+Ack=false)
+\item 
+\Hypertarget{classjacdac_1_1_bus_aed7ed032684ad4aae8e94cb0c16e1838}\label{classjacdac_1_1_bus_aed7ed032684ad4aae8e94cb0c16e1838} 
+bool {\bfseries reset\+Device} (uint64\+\_\+t device\+Identifier, bool request\+Ack=false)
+\item 
+\Hypertarget{classjacdac_1_1_bus_ad54e89491be1120722d0fe881ac51d39}\label{classjacdac_1_1_bus_ad54e89491be1120722d0fe881ac51d39} 
+bool {\bfseries standby} (uint64\+\_\+t device\+Identifier, uint32\+\_\+t duration\+Ms, bool request\+Ack=false)
+\item 
+\Hypertarget{classjacdac_1_1_bus_a4950e7b80541849ef9a5b188a893ba35}\label{classjacdac_1_1_bus_a4950e7b80541849ef9a5b188a893ba35} 
+bool {\bfseries set\+Status\+Light} (uint64\+\_\+t device\+Identifier, uint8\+\_\+t red, uint8\+\_\+t green, uint8\+\_\+t blue, uint8\+\_\+t speed=0)
+\item 
+\Hypertarget{classjacdac_1_1_bus_abf674168987374cc3c50c4bc6c68098b}\label{classjacdac_1_1_bus_abf674168987374cc3c50c4bc6c68098b} 
+bool {\bfseries request\+Device\+Description} (uint64\+\_\+t device\+Identifier)
+\item 
+\Hypertarget{classjacdac_1_1_bus_a4025cdd9ad788c49f15af5003b12feaa}\label{classjacdac_1_1_bus_a4025cdd9ad788c49f15af5003b12feaa} 
+bool {\bfseries request\+Product\+Identifier} (uint64\+\_\+t device\+Identifier)
+\item 
+\Hypertarget{classjacdac_1_1_bus_aa24f0726274e7f0cab448dc28660919a}\label{classjacdac_1_1_bus_aa24f0726274e7f0cab448dc28660919a} 
+bool {\bfseries request\+Firmware\+Version} (uint64\+\_\+t device\+Identifier)
+\item 
+\Hypertarget{classjacdac_1_1_bus_a9e1f45f5d5404233d1cbd4845d30023f}\label{classjacdac_1_1_bus_a9e1f45f5d5404233d1cbd4845d30023f} 
+bool {\bfseries request\+Uptime} (uint64\+\_\+t device\+Identifier)
+\item 
+\Hypertarget{classjacdac_1_1_bus_ac9dd0cf69716f65f1f58d890febbe6d3}\label{classjacdac_1_1_bus_ac9dd0cf69716f65f1f58d890febbe6d3} 
+{\footnotesize template$<$typename T$>$ }\\bool {\bfseries set\+Register} (const \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} \&service, uint16\+\_\+t reg, const T \&value, bool request\+Ack=false)
+\item 
+\Hypertarget{classjacdac_1_1_bus_a427b60dac7318458a91b582382762506}\label{classjacdac_1_1_bus_a427b60dac7318458a91b582382762506} 
+void {\bfseries set\+Command\+Error\+Handler} (Command\+Error\+Handler handler, void \texorpdfstring{$\ast$}{*}context=nullptr)
+\item 
+\Hypertarget{classjacdac_1_1_bus_ac4440bc832583f65977a80079a86161f}\label{classjacdac_1_1_bus_ac4440bc832583f65977a80079a86161f} 
+uint8\+\_\+t {\bfseries add\+Packet\+Handler} (Packet\+Handler handler, void \texorpdfstring{$\ast$}{*}context=nullptr, uint64\+\_\+t device\+Identifier=0, uint8\+\_\+t service\+Index=0xff, uint16\+\_\+t service\+Command=0xffff)
+\item 
+\Hypertarget{classjacdac_1_1_bus_a787ed7d9fffd87f95ed48d5a0472d54b}\label{classjacdac_1_1_bus_a787ed7d9fffd87f95ed48d5a0472d54b} 
+uint8\+\_\+t {\bfseries add\+Device\+Handler} (Device\+Handler handler, void \texorpdfstring{$\ast$}{*}context=nullptr)
+\item 
+\Hypertarget{classjacdac_1_1_bus_a85499e28a7bb5b2f628e60f9f7cd1bdc}\label{classjacdac_1_1_bus_a85499e28a7bb5b2f628e60f9f7cd1bdc} 
+uint8\+\_\+t {\bfseries add\+Ack\+Handler} (Ack\+Handler handler, void \texorpdfstring{$\ast$}{*}context=nullptr)
+\item 
+\Hypertarget{classjacdac_1_1_bus_a90da0d47253068c67554c612e5058874}\label{classjacdac_1_1_bus_a90da0d47253068c67554c612e5058874} 
+bool {\bfseries remove\+Packet\+Handler} (uint8\+\_\+t subscription)
+\item 
+\Hypertarget{classjacdac_1_1_bus_aeaa8f4b96954424ba3d4d2b570b6663c}\label{classjacdac_1_1_bus_aeaa8f4b96954424ba3d4d2b570b6663c} 
+bool {\bfseries remove\+Device\+Handler} (uint8\+\_\+t subscription)
+\item 
+\Hypertarget{classjacdac_1_1_bus_a425050aba8282a5f3454644ba4912ea7}\label{classjacdac_1_1_bus_a425050aba8282a5f3454644ba4912ea7} 
+bool {\bfseries remove\+Ack\+Handler} (uint8\+\_\+t subscription)
+\item 
+\Hypertarget{classjacdac_1_1_bus_a98073454cda08644cfbacd2c017885c8}\label{classjacdac_1_1_bus_a98073454cda08644cfbacd2c017885c8} 
+Error {\bfseries last\+Error} () const
+\item 
+\Hypertarget{classjacdac_1_1_bus_a6f3a01a3b6f3087b3e35df952713e332}\label{classjacdac_1_1_bus_a6f3a01a3b6f3087b3e35df952713e332} 
+const \doxymbox{\hyperlink{structjacdac_1_1_diagnostics}{Diagnostics}} \& {\bfseries diagnostics} () const
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classjacdac_1_1_bus_abfd7d3735406ceff8be0f6f4b8b7aee8}\label{classjacdac_1_1_bus_abfd7d3735406ceff8be0f6f4b8b7aee8} 
+class {\bfseries Led\+Strip\+Client}
+\item 
+\Hypertarget{classjacdac_1_1_bus_a9c044891ea590a41b7a6bd4112fdd5b1}\label{classjacdac_1_1_bus_a9c044891ea590a41b7a6bd4112fdd5b1} 
+class {\bfseries Service\+Client}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+src/Jacdac.\+h\item 
+src/Jacdac.\+cpp\end{DoxyCompactItemize}

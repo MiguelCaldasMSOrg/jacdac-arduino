@@ -23,7 +23,7 @@ static bool validService(const Service &service) {
     return service.valid() && service.serviceIndex <= SERVICE_INDEX_MAX_REGULAR;
 }
 
-Bus::Bus() : rxHead_(0), rxTail_(0), txHead_(0), txTail_(0), transmitting_(false), running_(false), commandErrorHandler_(nullptr), commandErrorContext_(nullptr), selfIdentifier_(0), nextAnnounce_(0), lastError_(Error::None) {
+Bus::Bus(): rxHead_(0), rxTail_(0), txHead_(0), txTail_(0), transmitting_(false), running_(false), commandErrorHandler_(nullptr), commandErrorContext_(nullptr), selfIdentifier_(0), nextAnnounce_(0), lastError_(Error::None) {
     memset(devices_, 0, sizeof(devices_));
     memset(ackRequests_, 0, sizeof(ackRequests_));
     memset(registerRequests_, 0, sizeof(registerRequests_));

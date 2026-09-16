@@ -18,7 +18,7 @@ constexpr uint8_t ACK_ATTEMPTS = 4;
 constexpr uint32_t ACK_DELAY_MS = 40;
 constexpr uint32_t DEVICE_TIMEOUT_MS = 2000;
 
-enum class Error : uint8_t {
+enum class Error: uint8_t {
     None,
     NotRunning,
     TransportUnavailable,
@@ -50,7 +50,9 @@ private:
 public:
     uint32_t serviceClasses[MAX_SERVICES_PER_DEVICE];
 
-    bool connected() const { return deviceIdentifier != 0; }
+    bool connected() const {
+        return deviceIdentifier != 0;
+    }
 
 private:
     uint8_t eventCounter;
@@ -62,10 +64,12 @@ struct Service {
     uint32_t serviceClass;
     uint8_t serviceIndex;
 
-    bool valid() const { return deviceIdentifier != 0; }
+    bool valid() const {
+        return deviceIdentifier != 0;
+    }
 };
 
-enum class DeviceEvent : uint8_t {
+enum class DeviceEvent: uint8_t {
     Connected,
     Disconnected,
     Restarted,
@@ -113,19 +117,41 @@ struct ServiceBinding {
     uint8_t serviceIndex;
     uint8_t instance;
 
-    explicit ServiceBinding(uint32_t serviceClass = 0, uint8_t instance = 0) : deviceIdentifier(0), serviceClass(serviceClass), serviceIndex(0), instance(instance) {}
-    bool bound() const { return deviceIdentifier != 0; }
-    void bind(const Service &service) { deviceIdentifier = service.deviceIdentifier; serviceIndex = service.serviceIndex; serviceClass = service.serviceClass; }
-    void clear() { deviceIdentifier = 0; serviceIndex = 0; }
+    explicit ServiceBinding(uint32_t serviceClass = 0, uint8_t instance = 0): deviceIdentifier(0), serviceClass(serviceClass), serviceIndex(0), instance(instance) {
+    }
+
+    bool bound() const {
+        return deviceIdentifier != 0;
+    }
+
+    void bind(const Service &service) {
+        deviceIdentifier = service.deviceIdentifier;
+        serviceIndex = service.serviceIndex;
+        serviceClass = service.serviceClass;
+    }
+
+    void clear() {
+        deviceIdentifier = 0;
+        serviceIndex = 0;
+    }
 };
 
 class CommandBatch {
 public:
     explicit CommandBatch(uint64_t deviceIdentifier, bool requestAck = false);
     bool add(const Service &service, uint16_t command, const void *data = nullptr, uint8_t size = 0);
-    template <typename T> bool add(const Service &service, uint16_t command, const T &value) { return add(service, command, &value, sizeof(value)); }
-    uint8_t packetCount() const { return packetCount_; }
-    Error error() const { return error_; }
+
+    template <typename T> bool add(const Service &service, uint16_t command, const T &value) {
+        return add(service, command, &value, sizeof(value));
+    }
+
+    uint8_t packetCount() const {
+        return packetCount_;
+    }
+
+    Error error() const {
+        return error_;
+    }
 
 private:
     friend class Bus;
@@ -266,7 +292,7 @@ protected:
     mutable ServiceBinding binding_;
 };
 
-class SensorClient : public ServiceClient {
+class SensorClient: public ServiceClient {
 public:
     SensorClient(Bus &bus, uint32_t serviceClass, uint8_t instance = 0);
     bool requestReading() const;
@@ -284,7 +310,7 @@ public:
 
 };
 
-class ActuatorClient : public ServiceClient {
+class ActuatorClient: public ServiceClient {
 public:
     ActuatorClient(Bus &bus, uint32_t serviceClass, uint8_t instance = 0);
     bool requestStatus() const;
@@ -292,7 +318,7 @@ public:
 
 };
 
-class ButtonClient : public SensorClient {
+class ButtonClient: public SensorClient {
 public:
     explicit ButtonClient(Bus &bus, uint8_t instance = 0);
     bool requestPressure() const;
@@ -301,7 +327,7 @@ public:
     bool readPressed(const PacketView &packet, bool &pressed) const;
 };
 
-class RotaryEncoderClient : public SensorClient {
+class RotaryEncoderClient: public SensorClient {
 public:
     explicit RotaryEncoderClient(Bus &bus, uint8_t instance = 0);
     bool requestPosition() const;
@@ -310,54 +336,54 @@ public:
     Service buttonService() const;
 };
 
-class PotentiometerClient : public SensorClient {
+class PotentiometerClient: public SensorClient {
 public:
     explicit PotentiometerClient(Bus &bus, uint8_t instance = 0);
     bool requestPosition() const;
     bool requestVariant() const;
 };
 
-class LightLevelClient : public SensorClient {
+class LightLevelClient: public SensorClient {
 public:
     explicit LightLevelClient(Bus &bus, uint8_t instance = 0);
     bool requestLightLevel() const;
     bool requestVariant() const;
 };
 
-class MagneticFieldLevelClient : public SensorClient {
+class MagneticFieldLevelClient: public SensorClient {
 public:
     explicit MagneticFieldLevelClient(Bus &bus, uint8_t instance = 0);
     bool requestStrength() const;
     bool requestVariant() const;
 };
 
-class AccelerometerClient : public SensorClient {
+class AccelerometerClient: public SensorClient {
 public:
     explicit AccelerometerClient(Bus &bus, uint8_t instance = 0);
     bool requestForces() const;
 };
 
-class DistanceClient : public SensorClient {
+class DistanceClient: public SensorClient {
 public:
     explicit DistanceClient(Bus &bus, uint8_t instance = 0);
     bool requestDistance() const;
     bool requestVariant() const;
 };
 
-class TemperatureClient : public SensorClient {
+class TemperatureClient: public SensorClient {
 public:
     explicit TemperatureClient(Bus &bus, uint8_t instance = 0);
     bool requestTemperature() const;
     bool requestVariant() const;
 };
 
-class HumidityClient : public SensorClient {
+class HumidityClient: public SensorClient {
 public:
     explicit HumidityClient(Bus &bus, uint8_t instance = 0);
     bool requestHumidity() const;
 };
 
-class LedStripClient : public ServiceClient {
+class LedStripClient: public ServiceClient {
 public:
     explicit LedStripClient(Bus &bus, uint8_t instance = 0);
     bool setBrightness(uint8_t brightness, bool requestAck = false) const;
@@ -374,7 +400,7 @@ public:
 
 };
 
-class LedClient : public ServiceClient {
+class LedClient: public ServiceClient {
 public:
     explicit LedClient(Bus &bus, uint8_t instance = 0);
     bool setBrightness(uint8_t brightness, bool requestAck = false) const;
@@ -385,7 +411,7 @@ public:
     bool requestActualBrightness() const;
 };
 
-class ServoClient : public ServiceClient {
+class ServoClient: public ServiceClient {
 public:
     explicit ServoClient(Bus &bus, uint8_t instance = 0);
     bool setAngle(float angleDegrees, bool requestAck = false) const;
@@ -398,7 +424,7 @@ public:
     bool requestActualAngle() const;
 };
 
-class RelayClient : public ActuatorClient {
+class RelayClient: public ActuatorClient {
 public:
     explicit RelayClient(Bus &bus, uint8_t instance = 0);
     bool setActive(bool active, bool requestAck = false) const;
@@ -412,7 +438,7 @@ struct VibrationStep {
     uint8_t intensity;
 };
 
-class VibrationMotorClient : public ServiceClient {
+class VibrationMotorClient: public ServiceClient {
 public:
     explicit VibrationMotorClient(Bus &bus, uint8_t instance = 0);
     bool vibrate(const VibrationStep *steps, uint8_t count, bool requestAck = false) const;
@@ -420,7 +446,7 @@ public:
     bool requestMaxVibrations() const;
 };
 
-class PowerClient : public ActuatorClient {
+class PowerClient: public ActuatorClient {
 public:
     explicit PowerClient(Bus &bus, uint8_t instance = 0);
     bool setAllowed(bool allowed, bool requestAck = false) const;
@@ -447,8 +473,16 @@ template <typename T> bool readValue(const PacketView &packet, T &value) {
     return true;
 }
 
-inline float q10ToFloat(int32_t value) { return value / 1024.0f; }
-inline float uq16ToFloat(uint16_t value) { return value / 65535.0f; }
-inline int32_t floatToQ16(float value) { return static_cast<int32_t>(value * 65536.0f); }
+inline float q10ToFloat(int32_t value) {
+    return value / 1024.0f;
+}
+
+inline float uq16ToFloat(uint16_t value) {
+    return value/65535.0f;
+}
+
+inline int32_t floatToQ16(float value) {
+    return static_cast<int32_t>(value*65536.0f);
+}
 
 } // namespace jacdac

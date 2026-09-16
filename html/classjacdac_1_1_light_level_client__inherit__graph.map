@@ -1,0 +1,7 @@
+<map id="jacdac::LightLevelClient" name="jacdac::LightLevelClient">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,155,166,181"/>
+<area shape="rect" id="Node000002" href="$classjacdac_1_1_sensor_client.html" title=" " alt="" coords="14,80,157,107"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,121,88,155,83,153,84,124"/>
+<area shape="rect" id="Node000003" href="$classjacdac_1_1_service_client.html" title=" " alt="" coords="13,5,158,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="87,45,88,80,83,79,84,50"/>
+</map>

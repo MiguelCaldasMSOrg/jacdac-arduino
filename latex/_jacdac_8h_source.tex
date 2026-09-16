@@ -1,0 +1,494 @@
+\doxysection{Jacdac.\+h}
+\hypertarget{_jacdac_8h_source}{}\label{_jacdac_8h_source}\index{src/Jacdac.h@{src/Jacdac.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <Arduino.h>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}JacdacProtocol.h"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}JacdacServices.h"{}}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{keyword}{namespace\ }jacdac\ \{}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{constexpr}\ uint8\_t\ MAX\_DEVICES\ =\ JACDAC\_MAX\_DEVICES;}
+\DoxyCodeLine{00010\ \textcolor{keyword}{constexpr}\ uint8\_t\ MAX\_SERVICES\_PER\_DEVICE\ =\ JACDAC\_MAX\_SERVICES\_PER\_DEVICE;}
+\DoxyCodeLine{00011\ \textcolor{keyword}{constexpr}\ uint8\_t\ RX\_QUEUE\_SIZE\ =\ JACDAC\_RX\_QUEUE\_SIZE;}
+\DoxyCodeLine{00012\ \textcolor{keyword}{constexpr}\ uint8\_t\ TX\_QUEUE\_SIZE\ =\ JACDAC\_TX\_QUEUE\_SIZE;}
+\DoxyCodeLine{00013\ \textcolor{keyword}{constexpr}\ uint8\_t\ MAX\_ACK\_REQUESTS\ =\ JACDAC\_MAX\_ACK\_REQUESTS;}
+\DoxyCodeLine{00014\ \textcolor{keyword}{constexpr}\ uint8\_t\ MAX\_REGISTER\_REQUESTS\ =\ JACDAC\_MAX\_REGISTER\_REQUESTS;}
+\DoxyCodeLine{00015\ \textcolor{keyword}{constexpr}\ uint8\_t\ MAX\_SUBSCRIBERS\ =\ JACDAC\_MAX\_SUBSCRIBERS;}
+\DoxyCodeLine{00016\ \textcolor{keyword}{constexpr}\ uint8\_t\ INVALID\_SUBSCRIPTION\ =\ 0xff;}
+\DoxyCodeLine{00017\ \textcolor{keyword}{constexpr}\ uint8\_t\ ACK\_ATTEMPTS\ =\ 4;}
+\DoxyCodeLine{00018\ \textcolor{keyword}{constexpr}\ uint32\_t\ ACK\_DELAY\_MS\ =\ 40;}
+\DoxyCodeLine{00019\ \textcolor{keyword}{constexpr}\ uint32\_t\ DEVICE\_TIMEOUT\_MS\ =\ 2000;}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \textcolor{keyword}{enum\ class}\ Error:\ uint8\_t\ \{}
+\DoxyCodeLine{00022\ \ \ \ \ None,}
+\DoxyCodeLine{00023\ \ \ \ \ NotRunning,}
+\DoxyCodeLine{00024\ \ \ \ \ TransportUnavailable,}
+\DoxyCodeLine{00025\ \ \ \ \ InvalidArgument,}
+\DoxyCodeLine{00026\ \ \ \ \ InvalidService,}
+\DoxyCodeLine{00027\ \ \ \ \ PacketTooLarge,}
+\DoxyCodeLine{00028\ \ \ \ \ QueueFull,}
+\DoxyCodeLine{00029\ \ \ \ \ NoCapacity,}
+\DoxyCodeLine{00030\ \ \ \ \ DuplicateRequest,}
+\DoxyCodeLine{00031\ \ \ \ \ InvalidSubscription}
+\DoxyCodeLine{00032\ \};}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \textcolor{keyword}{struct\ }\doxymbox{\hyperlink{structjacdac_1_1_device}{Device}}\ \{}
+\DoxyCodeLine{00035\ \ \ \ \ uint64\_t\ deviceIdentifier;}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00038\ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }Bus;}
+\DoxyCodeLine{00039\ \ \ \ \ uint32\_t\ lastSeen;}
+\DoxyCodeLine{00040\ \ \ \ \ uint16\_t\ announceFlags;}
+\DoxyCodeLine{00041\ \ \ \ \ uint8\_t\ packetCount;}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00044\ \ \ \ \ uint8\_t\ serviceCount;}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00047\ \ \ \ \ uint8\_t\ restartCounter;}
+\DoxyCodeLine{00048\ \ \ \ \ uint8\_t\ reportsSinceAnnounce;}
+\DoxyCodeLine{00049\ }
+\DoxyCodeLine{00050\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00051\ \ \ \ \ uint32\_t\ serviceClasses[MAX\_SERVICES\_PER\_DEVICE];}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \ \ \ \ \textcolor{keywordtype}{bool}\ connected()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ deviceIdentifier\ !=\ 0;}
+\DoxyCodeLine{00055\ \ \ \ \ \}}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00058\ \ \ \ \ uint8\_t\ eventCounter;}
+\DoxyCodeLine{00059\ \ \ \ \ \textcolor{keywordtype}{bool}\ eventCounterValid;}
+\DoxyCodeLine{00060\ \};}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ \textcolor{keyword}{struct\ }\doxymbox{\hyperlink{structjacdac_1_1_service}{Service}}\ \{}
+\DoxyCodeLine{00063\ \ \ \ \ uint64\_t\ deviceIdentifier;}
+\DoxyCodeLine{00064\ \ \ \ \ uint32\_t\ serviceClass;}
+\DoxyCodeLine{00065\ \ \ \ \ uint8\_t\ serviceIndex;}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ \ \ \ \ \textcolor{keywordtype}{bool}\ valid()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ deviceIdentifier\ !=\ 0;}
+\DoxyCodeLine{00069\ \ \ \ \ \}}
+\DoxyCodeLine{00070\ \};}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \textcolor{keyword}{enum\ class}\ DeviceEvent:\ uint8\_t\ \{}
+\DoxyCodeLine{00073\ \ \ \ \ Connected,}
+\DoxyCodeLine{00074\ \ \ \ \ Disconnected,}
+\DoxyCodeLine{00075\ \ \ \ \ Restarted,}
+\DoxyCodeLine{00076\ \ \ \ \ ReportsMissed}
+\DoxyCodeLine{00077\ \};}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \textcolor{keyword}{using\ }PacketHandler\ =\ void\ (*)(\textcolor{keyword}{const}\ PacketView\ \&packet,\ \textcolor{keywordtype}{void}\ *context);}
+\DoxyCodeLine{00080\ \textcolor{keyword}{using\ }DeviceHandler\ =\ void\ (*)(\textcolor{keyword}{const}\ Device\ \&device,\ DeviceEvent\ event,\ \textcolor{keywordtype}{void}\ *context);}
+\DoxyCodeLine{00081\ \textcolor{keyword}{using\ }AckHandler\ =\ void\ (*)(uint64\_t\ deviceIdentifier,\ uint16\_t\ packetCrc,\ \textcolor{keywordtype}{bool}\ acknowledged,\ \textcolor{keywordtype}{void}\ *context);}
+\DoxyCodeLine{00082\ \textcolor{keyword}{using\ }RegisterResponseHandler\ =\ void\ (*)(\textcolor{keyword}{const}\ PacketView\ *packet,\ \textcolor{keywordtype}{void}\ *context);}
+\DoxyCodeLine{00083\ \textcolor{keyword}{using\ }CommandErrorHandler\ =\ void\ (*)(\textcolor{keyword}{const}\ Service\ \&service,\ uint16\_t\ serviceCommand,\ uint16\_t\ packetCrc,\ \textcolor{keywordtype}{void}\ *context);}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \textcolor{keyword}{struct\ }\doxymbox{\hyperlink{structjacdac_1_1_diagnostics}{Diagnostics}}\ \{}
+\DoxyCodeLine{00086\ \ \ \ \ uint32\_t\ framesReceived;}
+\DoxyCodeLine{00087\ \ \ \ \ uint32\_t\ framesSent;}
+\DoxyCodeLine{00088\ \ \ \ \ uint32\_t\ crcErrors;}
+\DoxyCodeLine{00089\ \ \ \ \ uint32\_t\ receiveOverflows;}
+\DoxyCodeLine{00090\ \ \ \ \ uint32\_t\ transmitOverflows;}
+\DoxyCodeLine{00091\ \ \ \ \ uint32\_t\ malformedPackets;}
+\DoxyCodeLine{00092\ \ \ \ \ uint32\_t\ deviceOverflows;}
+\DoxyCodeLine{00093\ \ \ \ \ uint32\_t\ busErrors;}
+\DoxyCodeLine{00094\ \ \ \ \ uint32\_t\ collisions;}
+\DoxyCodeLine{00095\ \ \ \ \ uint32\_t\ acksReceived;}
+\DoxyCodeLine{00096\ \ \ \ \ uint32\_t\ ackRetries;}
+\DoxyCodeLine{00097\ \ \ \ \ uint32\_t\ ackTimeouts;}
+\DoxyCodeLine{00098\ \ \ \ \ uint32\_t\ duplicateEvents;}
+\DoxyCodeLine{00099\ \ \ \ \ uint32\_t\ outOfOrderEvents;}
+\DoxyCodeLine{00100\ \ \ \ \ uint32\_t\ deviceRestarts;}
+\DoxyCodeLine{00101\ \ \ \ \ uint32\_t\ missedReports;}
+\DoxyCodeLine{00102\ \ \ \ \ uint32\_t\ registerTimeouts;}
+\DoxyCodeLine{00103\ \ \ \ \ uint32\_t\ commandErrors;}
+\DoxyCodeLine{00104\ \ \ \ \ uint32\_t\ fallingEdges;}
+\DoxyCodeLine{00105\ \ \ \ \ uint32\_t\ receiveStarts;}
+\DoxyCodeLine{00106\ \ \ \ \ uint32\_t\ receiveCompletions;}
+\DoxyCodeLine{00107\ \ \ \ \ uint32\_t\ receiveBytes;}
+\DoxyCodeLine{00108\ \ \ \ \ uint32\_t\ receiveTimeouts;}
+\DoxyCodeLine{00109\ \ \ \ \ uint32\_t\ receiveShortFrames;}
+\DoxyCodeLine{00110\ \ \ \ \ uint32\_t\ receiveInvalidFrames;}
+\DoxyCodeLine{00111\ \ \ \ \ uint32\_t\ receiveHardwareErrors;}
+\DoxyCodeLine{00112\ \};}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \textcolor{keyword}{struct\ }ServiceBinding\ \{}
+\DoxyCodeLine{00115\ \ \ \ \ uint64\_t\ deviceIdentifier;}
+\DoxyCodeLine{00116\ \ \ \ \ uint32\_t\ serviceClass;}
+\DoxyCodeLine{00117\ \ \ \ \ uint8\_t\ serviceIndex;}
+\DoxyCodeLine{00118\ \ \ \ \ uint8\_t\ instance;}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \ \ \textcolor{keyword}{explicit}\ ServiceBinding(uint32\_t\ serviceClass\ =\ 0,\ uint8\_t\ instance\ =\ 0):\ deviceIdentifier(0),\ serviceClass(serviceClass),\ serviceIndex(0),\ instance(instance)\ \{}
+\DoxyCodeLine{00121\ \ \ \ \ \}}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00123\ \ \ \ \ \textcolor{keywordtype}{bool}\ bound()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ deviceIdentifier\ !=\ 0;}
+\DoxyCodeLine{00125\ \ \ \ \ \}}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ \ \ \textcolor{keywordtype}{void}\ bind(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}}\ \&service)\ \{}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ deviceIdentifier\ =\ service.deviceIdentifier;}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ serviceIndex\ =\ service.serviceIndex;}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ serviceClass\ =\ service.serviceClass;}
+\DoxyCodeLine{00131\ \ \ \ \ \}}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \ \ \ \ \textcolor{keywordtype}{void}\ clear()\ \{}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ deviceIdentifier\ =\ 0;}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ serviceIndex\ =\ 0;}
+\DoxyCodeLine{00136\ \ \ \ \ \}}
+\DoxyCodeLine{00137\ \};}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00139\ \textcolor{keyword}{class\ }CommandBatch\ \{}
+\DoxyCodeLine{00140\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00141\ \ \ \ \ \textcolor{keyword}{explicit}\ CommandBatch(uint64\_t\ deviceIdentifier,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00142\ \ \ \ \ \textcolor{keywordtype}{bool}\ add(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}}\ \&service,\ uint16\_t\ command,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *data\ =\ \textcolor{keyword}{nullptr},\ uint8\_t\ size\ =\ 0);}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>\ \textcolor{keywordtype}{bool}\ add(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}}\ \&service,\ uint16\_t\ command,\ \textcolor{keyword}{const}\ T\ \&value)\ \{}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ add(service,\ command,\ \&value,\ \textcolor{keyword}{sizeof}(value));}
+\DoxyCodeLine{00146\ \ \ \ \ \}}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00148\ \ \ \ \ uint8\_t\ packetCount()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ packetCount\_;}
+\DoxyCodeLine{00150\ \ \ \ \ \}}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00152\ \ \ \ \ Error\ error()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ error\_;}
+\DoxyCodeLine{00154\ \ \ \ \ \}}
+\DoxyCodeLine{00155\ }
+\DoxyCodeLine{00156\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00157\ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }Bus;}
+\DoxyCodeLine{00158\ \ \ \ \ \doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ frame\_;}
+\DoxyCodeLine{00159\ \ \ \ \ uint8\_t\ packetCount\_;}
+\DoxyCodeLine{00160\ \ \ \ \ Error\ error\_;}
+\DoxyCodeLine{00161\ \};}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \textcolor{keyword}{class\ }Bus\ \{}
+\DoxyCodeLine{00164\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00165\ \ \ \ \ Bus();}
+\DoxyCodeLine{00166\ \ \ \ \ \string~Bus();}
+\DoxyCodeLine{00167\ \ \ \ \ Bus(\textcolor{keyword}{const}\ Bus\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00168\ \ \ \ \ Bus\ \&operator=(\textcolor{keyword}{const}\ Bus\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00169\ \ \ \ \ \textcolor{keywordtype}{bool}\ begin(uint8\_t\ pin\ =\ 12);}
+\DoxyCodeLine{00170\ \ \ \ \ \textcolor{keywordtype}{void}\ end();}
+\DoxyCodeLine{00171\ \ \ \ \ \textcolor{keywordtype}{void}\ process();}
+\DoxyCodeLine{00172\ \ \ \ \ \textcolor{keywordtype}{bool}\ running()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ \ \ \ \ uint8\_t\ deviceCount()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00175\ \ \ \ \ \textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_device}{Device}}\ *device(uint8\_t\ index)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00176\ \ \ \ \ \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}}\ findService(uint32\_t\ serviceClass,\ uint8\_t\ instance\ =\ 0)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00177\ \ \ \ \ \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}}\ service(uint64\_t\ deviceIdentifier,\ uint8\_t\ serviceIndex)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00178\ \ \ \ \ \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}}\ resolve(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_service_binding}{ServiceBinding}}\ \&binding)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00180\ \ \ \ \ \textcolor{keywordtype}{bool}\ sendCommand(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}}\ \&service,\ uint16\_t\ command,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *data\ =\ \textcolor{keyword}{nullptr},\ uint8\_t\ size\ =\ 0,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00181\ \ \ \ \ \textcolor{keywordtype}{bool}\ getRegister(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}}\ \&service,\ uint16\_t\ reg);}
+\DoxyCodeLine{00182\ \ \ \ \ \textcolor{keywordtype}{bool}\ setRegister(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}}\ \&service,\ uint16\_t\ reg,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *data,\ uint8\_t\ size,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00183\ \ \ \ \ \textcolor{keywordtype}{bool}\ getRegisterAsync(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}}\ \&service,\ uint16\_t\ reg,\ RegisterResponseHandler\ handler,\ \textcolor{keywordtype}{void}\ *context\ =\ \textcolor{keyword}{nullptr},\ uint32\_t\ timeoutMs\ =\ 1000);}
+\DoxyCodeLine{00184\ \ \ \ \ \textcolor{keywordtype}{bool}\ sendMulticast(uint32\_t\ serviceClass,\ uint16\_t\ command,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *data\ =\ \textcolor{keyword}{nullptr},\ uint8\_t\ size\ =\ 0);}
+\DoxyCodeLine{00185\ \ \ \ \ \textcolor{keywordtype}{bool}\ sendBatch(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{classjacdac_1_1_command_batch}{CommandBatch}}\ \&batch);}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00187\ \ \ \ \ \textcolor{keywordtype}{bool}\ identify(uint64\_t\ deviceIdentifier,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00188\ \ \ \ \ \textcolor{keywordtype}{bool}\ resetDevice(uint64\_t\ deviceIdentifier,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00189\ \ \ \ \ \textcolor{keywordtype}{bool}\ standby(uint64\_t\ deviceIdentifier,\ uint32\_t\ durationMs,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00190\ \ \ \ \ \textcolor{keywordtype}{bool}\ setStatusLight(uint64\_t\ deviceIdentifier,\ uint8\_t\ red,\ uint8\_t\ green,\ uint8\_t\ blue,\ uint8\_t\ speed\ =\ 0);}
+\DoxyCodeLine{00191\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestDeviceDescription(uint64\_t\ deviceIdentifier);}
+\DoxyCodeLine{00192\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestProductIdentifier(uint64\_t\ deviceIdentifier);}
+\DoxyCodeLine{00193\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestFirmwareVersion(uint64\_t\ deviceIdentifier);}
+\DoxyCodeLine{00194\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestUptime(uint64\_t\ deviceIdentifier);}
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00196\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>\ \textcolor{keywordtype}{bool}\ setRegister(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}}\ \&service,\ uint16\_t\ reg,\ \textcolor{keyword}{const}\ T\ \&value,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \{}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ setRegister(service,\ reg,\ \&value,\ \textcolor{keyword}{sizeof}(value),\ requestAck);}
+\DoxyCodeLine{00198\ \ \ \ \ \}}
+\DoxyCodeLine{00199\ }
+\DoxyCodeLine{00200\ \ \ \ \ \textcolor{keywordtype}{void}\ setCommandErrorHandler(CommandErrorHandler\ handler,\ \textcolor{keywordtype}{void}\ *context\ =\ \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{00201\ \ \ \ \ uint8\_t\ addPacketHandler(PacketHandler\ handler,\ \textcolor{keywordtype}{void}\ *context\ =\ \textcolor{keyword}{nullptr},\ uint64\_t\ deviceIdentifier\ =\ 0,\ uint8\_t\ serviceIndex\ =\ 0xff,\ uint16\_t\ serviceCommand\ =\ 0xffff);}
+\DoxyCodeLine{00202\ \ \ \ \ uint8\_t\ addDeviceHandler(DeviceHandler\ handler,\ \textcolor{keywordtype}{void}\ *context\ =\ \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{00203\ \ \ \ \ uint8\_t\ addAckHandler(AckHandler\ handler,\ \textcolor{keywordtype}{void}\ *context\ =\ \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{00204\ \ \ \ \ \textcolor{keywordtype}{bool}\ removePacketHandler(uint8\_t\ subscription);}
+\DoxyCodeLine{00205\ \ \ \ \ \textcolor{keywordtype}{bool}\ removeDeviceHandler(uint8\_t\ subscription);}
+\DoxyCodeLine{00206\ \ \ \ \ \textcolor{keywordtype}{bool}\ removeAckHandler(uint8\_t\ subscription);}
+\DoxyCodeLine{00207\ \ \ \ \ Error\ lastError()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00208\ \ \ \ \ \textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_diagnostics}{Diagnostics}}\ \&diagnostics()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00209\ }
+\DoxyCodeLine{00210\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00211\ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }LedStripClient;}
+\DoxyCodeLine{00212\ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }ServiceClient;}
+\DoxyCodeLine{00213\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ receiveFromTransport(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ \&frame,\ \textcolor{keywordtype}{void}\ *context);}
+\DoxyCodeLine{00214\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ transmitDoneFromTransport(\textcolor{keywordtype}{void}\ *context);}
+\DoxyCodeLine{00215\ \ \ \ \ \textcolor{keywordtype}{void}\ handleFrame(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ \&frame);}
+\DoxyCodeLine{00216\ \ \ \ \ \textcolor{keywordtype}{void}\ handlePacket(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_packet_view}{PacketView}}\ \&packet);}
+\DoxyCodeLine{00217\ \ \ \ \ \textcolor{keywordtype}{void}\ handleAnnounce(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_packet_view}{PacketView}}\ \&packet);}
+\DoxyCodeLine{00218\ \ \ \ \ \textcolor{keywordtype}{bool}\ acceptEvent(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_packet_view}{PacketView}}\ \&packet,\ \doxymbox{\hyperlink{structjacdac_1_1_device}{Device}}\ *device);}
+\DoxyCodeLine{00219\ \ \ \ \ int8\_t\ trackAck(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ \&frame);}
+\DoxyCodeLine{00220\ \ \ \ \ \textcolor{keywordtype}{void}\ handleAck(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_packet_view}{PacketView}}\ \&packet);}
+\DoxyCodeLine{00221\ \ \ \ \ \textcolor{keywordtype}{void}\ processAcks(uint32\_t\ now);}
+\DoxyCodeLine{00222\ \ \ \ \ \textcolor{keywordtype}{void}\ processRegisterRequests(uint32\_t\ now);}
+\DoxyCodeLine{00223\ \ \ \ \ \textcolor{keywordtype}{void}\ handleRegisterResponse(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_packet_view}{PacketView}}\ \&packet);}
+\DoxyCodeLine{00224\ \ \ \ \ \textcolor{keywordtype}{void}\ handleCommandError(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_packet_view}{PacketView}}\ \&packet);}
+\DoxyCodeLine{00225\ \ \ \ \ \textcolor{keywordtype}{void}\ dispatchPacket(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_packet_view}{PacketView}}\ \&packet);}
+\DoxyCodeLine{00226\ \ \ \ \ \textcolor{keywordtype}{void}\ dispatchDevice(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_device}{Device}}\ \&device,\ DeviceEvent\ event);}
+\DoxyCodeLine{00227\ \ \ \ \ \textcolor{keywordtype}{void}\ dispatchAck(uint64\_t\ deviceIdentifier,\ uint16\_t\ packetCrc,\ \textcolor{keywordtype}{bool}\ acknowledged);}
+\DoxyCodeLine{00228\ \ \ \ \ \textcolor{keywordtype}{void}\ queueAnnounce();}
+\DoxyCodeLine{00229\ \ \ \ \ \doxymbox{\hyperlink{structjacdac_1_1_device}{Device}}\ *findDevice(uint64\_t\ identifier);}
+\DoxyCodeLine{00230\ \ \ \ \ \textcolor{keywordtype}{bool}\ queueFrame(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ \&frame);}
+\DoxyCodeLine{00231\ \ \ \ \ \textcolor{keywordtype}{void}\ startNextTransmission();}
+\DoxyCodeLine{00232\ }
+\DoxyCodeLine{00233\ \ \ \ \ \doxymbox{\hyperlink{structjacdac_1_1_device}{Device}}\ devices\_[MAX\_DEVICES];}
+\DoxyCodeLine{00234\ \ \ \ \ \doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ rxQueue\_[RX\_QUEUE\_SIZE\ +\ 1];}
+\DoxyCodeLine{00235\ \ \ \ \ \doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ txQueue\_[TX\_QUEUE\_SIZE\ +\ 1];}
+\DoxyCodeLine{00236\ \ \ \ \ \textcolor{keyword}{volatile}\ uint8\_t\ rxHead\_;}
+\DoxyCodeLine{00237\ \ \ \ \ \textcolor{keyword}{volatile}\ uint8\_t\ rxTail\_;}
+\DoxyCodeLine{00238\ \ \ \ \ \textcolor{keyword}{volatile}\ uint8\_t\ txHead\_;}
+\DoxyCodeLine{00239\ \ \ \ \ \textcolor{keyword}{volatile}\ uint8\_t\ txTail\_;}
+\DoxyCodeLine{00240\ \ \ \ \ \textcolor{keyword}{volatile}\ \textcolor{keywordtype}{bool}\ transmitting\_;}
+\DoxyCodeLine{00241\ \ \ \ \ \textcolor{keywordtype}{bool}\ running\_;}
+\DoxyCodeLine{00242\ \ \ \ \ CommandErrorHandler\ commandErrorHandler\_;}
+\DoxyCodeLine{00243\ \ \ \ \ \textcolor{keywordtype}{void}\ *commandErrorContext\_;}
+\DoxyCodeLine{00244\ \ \ \ \ uint64\_t\ selfIdentifier\_;}
+\DoxyCodeLine{00245\ \ \ \ \ uint32\_t\ nextAnnounce\_;}
+\DoxyCodeLine{00246\ \ \ \ \ \textcolor{keyword}{struct\ }AckRequest\ \{}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ frame;}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ uint32\_t\ nextRetry;}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ uint16\_t\ crc;}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ uint8\_t\ attempts;}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ active;}
+\DoxyCodeLine{00252\ \ \ \ \ \}\ ackRequests\_[MAX\_ACK\_REQUESTS];}
+\DoxyCodeLine{00253\ \ \ \ \ \textcolor{keyword}{struct\ }RegisterRequest\ \{}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ uint64\_t\ deviceIdentifier;}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ uint32\_t\ deadline;}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \ \ RegisterResponseHandler\ handler;}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ *context;}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ uint16\_t\ serviceCommand;}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ uint8\_t\ serviceIndex;}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ active;}
+\DoxyCodeLine{00261\ \ \ \ \ \}\ registerRequests\_[MAX\_REGISTER\_REQUESTS];}
+\DoxyCodeLine{00262\ \ \ \ \ \textcolor{keyword}{struct\ }PacketSubscription\ \{}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ PacketHandler\ handler;}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ *context;}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ uint64\_t\ deviceIdentifier;}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ uint16\_t\ serviceCommand;}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ uint8\_t\ serviceIndex;}
+\DoxyCodeLine{00268\ \ \ \ \ \}\ packetSubscriptions\_[MAX\_SUBSCRIBERS];}
+\DoxyCodeLine{00269\ \ \ \ \ \textcolor{keyword}{struct\ }DeviceSubscription\ \{}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ DeviceHandler\ handler;}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ *context;}
+\DoxyCodeLine{00272\ \ \ \ \ \}\ deviceSubscriptions\_[MAX\_SUBSCRIBERS];}
+\DoxyCodeLine{00273\ \ \ \ \ \textcolor{keyword}{struct\ }AckSubscription\ \{}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ AckHandler\ handler;}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ *context;}
+\DoxyCodeLine{00276\ \ \ \ \ \}\ ackSubscriptions\_[MAX\_SUBSCRIBERS];}
+\DoxyCodeLine{00277\ \ \ \ \ Error\ lastError\_;}
+\DoxyCodeLine{00278\ \ \ \ \ \doxymbox{\hyperlink{structjacdac_1_1_diagnostics}{Diagnostics}}\ diagnostics\_;}
+\DoxyCodeLine{00279\ \};}
+\DoxyCodeLine{00280\ }
+\DoxyCodeLine{00281\ \textcolor{keyword}{class\ }ServiceClient\ \{}
+\DoxyCodeLine{00282\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00283\ \ \ \ \ ServiceClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint32\_t\ serviceClass,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00284\ \ \ \ \ \textcolor{keywordtype}{bool}\ connected()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00285\ \ \ \ \ \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}}\ resolve()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00286\ \ \ \ \ \textcolor{keywordtype}{bool}\ bind(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}}\ \&service);}
+\DoxyCodeLine{00287\ \ \ \ \ \textcolor{keywordtype}{void}\ clearBinding();}
+\DoxyCodeLine{00288\ }
+\DoxyCodeLine{00289\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00290\ \ \ \ \ \textcolor{keywordtype}{bool}\ fail(Error\ error)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00291\ \ \ \ \ \doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus\_;}
+\DoxyCodeLine{00292\ \ \ \ \ \textcolor{keyword}{mutable}\ \doxymbox{\hyperlink{structjacdac_1_1_service_binding}{ServiceBinding}}\ binding\_;}
+\DoxyCodeLine{00293\ \};}
+\DoxyCodeLine{00294\ }
+\DoxyCodeLine{00295\ \textcolor{keyword}{class\ }SensorClient:\ \textcolor{keyword}{public}\ ServiceClient\ \{}
+\DoxyCodeLine{00296\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00297\ \ \ \ \ SensorClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint32\_t\ serviceClass,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00298\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestReading()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00299\ \ \ \ \ \textcolor{keywordtype}{bool}\ setStreaming(uint8\_t\ samples\ =\ 255)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00300\ \ \ \ \ \textcolor{keywordtype}{bool}\ setStreamingInterval(uint32\_t\ milliseconds)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00301\ \ \ \ \ \textcolor{keywordtype}{bool}\ setReadingRange(uint32\_t\ range)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00302\ \ \ \ \ \textcolor{keywordtype}{bool}\ setInactiveThreshold(int32\_t\ threshold)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00303\ \ \ \ \ \textcolor{keywordtype}{bool}\ setActiveThreshold(int32\_t\ threshold)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00304\ \ \ \ \ \textcolor{keywordtype}{bool}\ calibrate(\textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00305\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestStatus()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00306\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestPreferredStreamingInterval()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00307\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestReadingResolution()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00308\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestInstanceName()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00309\ \ \ \ \ \textcolor{keywordtype}{bool}\ matchesReading(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_packet_view}{PacketView}}\ \&packet)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00310\ }
+\DoxyCodeLine{00311\ \};}
+\DoxyCodeLine{00312\ }
+\DoxyCodeLine{00313\ \textcolor{keyword}{class\ }ActuatorClient:\ \textcolor{keyword}{public}\ ServiceClient\ \{}
+\DoxyCodeLine{00314\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00315\ \ \ \ \ ActuatorClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint32\_t\ serviceClass,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00316\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestStatus()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00317\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestInstanceName()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00318\ }
+\DoxyCodeLine{00319\ \};}
+\DoxyCodeLine{00320\ }
+\DoxyCodeLine{00321\ \textcolor{keyword}{class\ }ButtonClient:\ \textcolor{keyword}{public}\ SensorClient\ \{}
+\DoxyCodeLine{00322\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00323\ \ \ \ \ \textcolor{keyword}{explicit}\ ButtonClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00324\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestPressure()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00325\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestPressed()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00326\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestAnalog()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00327\ \ \ \ \ \textcolor{keywordtype}{bool}\ readPressed(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_packet_view}{PacketView}}\ \&packet,\ \textcolor{keywordtype}{bool}\ \&pressed)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00328\ \};}
+\DoxyCodeLine{00329\ }
+\DoxyCodeLine{00330\ \textcolor{keyword}{class\ }RotaryEncoderClient:\ \textcolor{keyword}{public}\ SensorClient\ \{}
+\DoxyCodeLine{00331\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00332\ \ \ \ \ \textcolor{keyword}{explicit}\ RotaryEncoderClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00333\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestPosition()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00334\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestClicksPerTurn()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00335\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestClicker()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00336\ \ \ \ \ \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}}\ buttonService()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00337\ \};}
+\DoxyCodeLine{00338\ }
+\DoxyCodeLine{00339\ \textcolor{keyword}{class\ }PotentiometerClient:\ \textcolor{keyword}{public}\ SensorClient\ \{}
+\DoxyCodeLine{00340\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00341\ \ \ \ \ \textcolor{keyword}{explicit}\ PotentiometerClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00342\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestPosition()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00343\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestVariant()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00344\ \};}
+\DoxyCodeLine{00345\ }
+\DoxyCodeLine{00346\ \textcolor{keyword}{class\ }LightLevelClient:\ \textcolor{keyword}{public}\ SensorClient\ \{}
+\DoxyCodeLine{00347\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00348\ \ \ \ \ \textcolor{keyword}{explicit}\ LightLevelClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00349\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestLightLevel()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00350\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestVariant()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00351\ \};}
+\DoxyCodeLine{00352\ }
+\DoxyCodeLine{00353\ \textcolor{keyword}{class\ }MagneticFieldLevelClient:\ \textcolor{keyword}{public}\ SensorClient\ \{}
+\DoxyCodeLine{00354\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00355\ \ \ \ \ \textcolor{keyword}{explicit}\ MagneticFieldLevelClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00356\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestStrength()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00357\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestVariant()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00358\ \};}
+\DoxyCodeLine{00359\ }
+\DoxyCodeLine{00360\ \textcolor{keyword}{class\ }AccelerometerClient:\ \textcolor{keyword}{public}\ SensorClient\ \{}
+\DoxyCodeLine{00361\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00362\ \ \ \ \ \textcolor{keyword}{explicit}\ AccelerometerClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00363\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestForces()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00364\ \};}
+\DoxyCodeLine{00365\ }
+\DoxyCodeLine{00366\ \textcolor{keyword}{class\ }DistanceClient:\ \textcolor{keyword}{public}\ SensorClient\ \{}
+\DoxyCodeLine{00367\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00368\ \ \ \ \ \textcolor{keyword}{explicit}\ DistanceClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00369\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestDistance()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00370\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestVariant()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00371\ \};}
+\DoxyCodeLine{00372\ }
+\DoxyCodeLine{00373\ \textcolor{keyword}{class\ }TemperatureClient:\ \textcolor{keyword}{public}\ SensorClient\ \{}
+\DoxyCodeLine{00374\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00375\ \ \ \ \ \textcolor{keyword}{explicit}\ TemperatureClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00376\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestTemperature()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00377\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestVariant()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00378\ \};}
+\DoxyCodeLine{00379\ }
+\DoxyCodeLine{00380\ \textcolor{keyword}{class\ }HumidityClient:\ \textcolor{keyword}{public}\ SensorClient\ \{}
+\DoxyCodeLine{00381\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00382\ \ \ \ \ \textcolor{keyword}{explicit}\ HumidityClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00383\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestHumidity()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00384\ \};}
+\DoxyCodeLine{00385\ }
+\DoxyCodeLine{00386\ \textcolor{keyword}{class\ }LedStripClient:\ \textcolor{keyword}{public}\ ServiceClient\ \{}
+\DoxyCodeLine{00387\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00388\ \ \ \ \ \textcolor{keyword}{explicit}\ LedStripClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00389\ \ \ \ \ \textcolor{keywordtype}{bool}\ setBrightness(uint8\_t\ brightness,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00390\ \ \ \ \ \textcolor{keywordtype}{bool}\ setNumPixels(uint16\_t\ numPixels,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00391\ \ \ \ \ \textcolor{keywordtype}{bool}\ setMaxPower(uint16\_t\ milliamps,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00392\ \ \ \ \ \textcolor{keywordtype}{bool}\ setNumRepeats(uint16\_t\ repeats,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00393\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestActualBrightness()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00394\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestNumPixels()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00395\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestMaxPixels()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00396\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestVariant()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00397\ \ \ \ \ \textcolor{keywordtype}{bool}\ runProgram(\textcolor{keyword}{const}\ uint8\_t\ *program,\ uint8\_t\ size,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00398\ \ \ \ \ \textcolor{keywordtype}{bool}\ setAll(uint8\_t\ red,\ uint8\_t\ green,\ uint8\_t\ blue,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00399\ \ \ \ \ \textcolor{keywordtype}{bool}\ setPixel(uint16\_t\ pixel,\ uint8\_t\ red,\ uint8\_t\ green,\ uint8\_t\ blue,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00400\ }
+\DoxyCodeLine{00401\ \};}
+\DoxyCodeLine{00402\ }
+\DoxyCodeLine{00403\ \textcolor{keyword}{class\ }LedClient:\ \textcolor{keyword}{public}\ ServiceClient\ \{}
+\DoxyCodeLine{00404\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00405\ \ \ \ \ \textcolor{keyword}{explicit}\ LedClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00406\ \ \ \ \ \textcolor{keywordtype}{bool}\ setBrightness(uint8\_t\ brightness,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00407\ \ \ \ \ \textcolor{keywordtype}{bool}\ setPixels(\textcolor{keyword}{const}\ uint8\_t\ *rgb,\ uint8\_t\ byteCount,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00408\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestPixels()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00409\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestNumPixels()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00410\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestVariant()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00411\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestActualBrightness()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00412\ \};}
+\DoxyCodeLine{00413\ }
+\DoxyCodeLine{00414\ \textcolor{keyword}{class\ }ServoClient:\ \textcolor{keyword}{public}\ ServiceClient\ \{}
+\DoxyCodeLine{00415\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00416\ \ \ \ \ \textcolor{keyword}{explicit}\ ServoClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00417\ \ \ \ \ \textcolor{keywordtype}{bool}\ setAngle(\textcolor{keywordtype}{float}\ angleDegrees,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00418\ \ \ \ \ \textcolor{keywordtype}{bool}\ setAngleQ16(int32\_t\ angleDegreesQ16,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00419\ \ \ \ \ \textcolor{keywordtype}{bool}\ setEnabled(\textcolor{keywordtype}{bool}\ enabled,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00420\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestAngle()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00421\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestEnabled()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00422\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestMinAngle()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00423\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestMaxAngle()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00424\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestActualAngle()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00425\ \};}
+\DoxyCodeLine{00426\ }
+\DoxyCodeLine{00427\ \textcolor{keyword}{class\ }RelayClient:\ \textcolor{keyword}{public}\ ActuatorClient\ \{}
+\DoxyCodeLine{00428\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00429\ \ \ \ \ \textcolor{keyword}{explicit}\ RelayClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00430\ \ \ \ \ \textcolor{keywordtype}{bool}\ setActive(\textcolor{keywordtype}{bool}\ active,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00431\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestActive()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00432\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestVariant()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00433\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestMaxSwitchingCurrent()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00434\ \};}
+\DoxyCodeLine{00435\ }
+\DoxyCodeLine{00436\ \textcolor{keyword}{struct\ }\doxymbox{\hyperlink{structjacdac_1_1_vibration_step}{VibrationStep}}\ \{}
+\DoxyCodeLine{00437\ \ \ \ \ uint8\_t\ duration8Milliseconds;}
+\DoxyCodeLine{00438\ \ \ \ \ uint8\_t\ intensity;}
+\DoxyCodeLine{00439\ \};}
+\DoxyCodeLine{00440\ }
+\DoxyCodeLine{00441\ \textcolor{keyword}{class\ }VibrationMotorClient:\ \textcolor{keyword}{public}\ ServiceClient\ \{}
+\DoxyCodeLine{00442\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00443\ \ \ \ \ \textcolor{keyword}{explicit}\ VibrationMotorClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00444\ \ \ \ \ \textcolor{keywordtype}{bool}\ vibrate(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_vibration_step}{VibrationStep}}\ *steps,\ uint8\_t\ count,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00445\ \ \ \ \ \textcolor{keywordtype}{bool}\ stop(\textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00446\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestMaxVibrations()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00447\ \};}
+\DoxyCodeLine{00448\ }
+\DoxyCodeLine{00449\ \textcolor{keyword}{class\ }PowerClient:\ \textcolor{keyword}{public}\ ActuatorClient\ \{}
+\DoxyCodeLine{00450\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00451\ \ \ \ \ \textcolor{keyword}{explicit}\ PowerClient(\doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ \&bus,\ uint8\_t\ instance\ =\ 0);}
+\DoxyCodeLine{00452\ \ \ \ \ \textcolor{keywordtype}{bool}\ setAllowed(\textcolor{keywordtype}{bool}\ allowed,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00453\ \ \ \ \ \textcolor{keywordtype}{bool}\ setMaxPower(uint16\_t\ milliamps,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00454\ \ \ \ \ \textcolor{keywordtype}{bool}\ setKeepOnPulse(uint16\_t\ durationMilliseconds,\ uint16\_t\ periodMilliseconds,\ \textcolor{keywordtype}{bool}\ requestAck\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00455\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestAllowed()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00456\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestMaxPower()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00457\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestCurrentDraw()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00458\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestBatteryVoltage()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00459\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestPowerStatus()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00460\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestBatteryCharge()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00461\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestBatteryCapacity()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00462\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestKeepOnPulseDuration()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00463\ \ \ \ \ \textcolor{keywordtype}{bool}\ requestKeepOnPulsePeriod()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00464\ \};}
+\DoxyCodeLine{00465\ }
+\DoxyCodeLine{00466\ \textcolor{keyword}{extern}\ \doxymbox{\hyperlink{classjacdac_1_1_bus}{Bus}}\ Jacdac;}
+\DoxyCodeLine{00467\ }
+\DoxyCodeLine{00468\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>\ \textcolor{keywordtype}{bool}\ readValue(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_packet_view}{PacketView}}\ \&packet,\ T\ \&value)\ \{}
+\DoxyCodeLine{00469\ \ \ \ \ \textcolor{keywordflow}{if}\ (packet.dataSize\ <\ \textcolor{keyword}{sizeof}(T))\ \{}
+\DoxyCodeLine{00470\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00471\ \ \ \ \ \}}
+\DoxyCodeLine{00472\ \ \ \ \ memcpy(\&value,\ packet.data,\ \textcolor{keyword}{sizeof}(T));}
+\DoxyCodeLine{00473\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00474\ \}}
+\DoxyCodeLine{00475\ }
+\DoxyCodeLine{00476\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{float}\ q10ToFloat(int32\_t\ value)\ \{}
+\DoxyCodeLine{00477\ \ \ \ \ \textcolor{keywordflow}{return}\ value\ /\ 1024.0f;}
+\DoxyCodeLine{00478\ \}}
+\DoxyCodeLine{00479\ }
+\DoxyCodeLine{00480\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{float}\ uq16ToFloat(uint16\_t\ value)\ \{}
+\DoxyCodeLine{00481\ \ \ \ \ \textcolor{keywordflow}{return}\ value/65535.0f;}
+\DoxyCodeLine{00482\ \}}
+\DoxyCodeLine{00483\ }
+\DoxyCodeLine{00484\ \textcolor{keyword}{inline}\ int32\_t\ floatToQ16(\textcolor{keywordtype}{float}\ value)\ \{}
+\DoxyCodeLine{00485\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}int32\_t\textcolor{keyword}{>}(value*65536.0f);}
+\DoxyCodeLine{00486\ \}}
+\DoxyCodeLine{00487\ }
+\DoxyCodeLine{00488\ \}\ \textcolor{comment}{//\ namespace\ jacdac}}
+
+\end{DoxyCode}

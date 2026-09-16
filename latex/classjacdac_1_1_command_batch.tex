@@ -1,0 +1,32 @@
+\doxysection{jacdac::Command\+Batch Class Reference}
+\hypertarget{classjacdac_1_1_command_batch}{}\label{classjacdac_1_1_command_batch}\index{jacdac::CommandBatch@{jacdac::CommandBatch}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classjacdac_1_1_command_batch_ae99d21fcae5036bcc907edf819a1791a}\label{classjacdac_1_1_command_batch_ae99d21fcae5036bcc907edf819a1791a} 
+{\bfseries Command\+Batch} (uint64\+\_\+t device\+Identifier, bool request\+Ack=false)
+\item 
+\Hypertarget{classjacdac_1_1_command_batch_aa540af09f03c3c4da740f861d2bbc784}\label{classjacdac_1_1_command_batch_aa540af09f03c3c4da740f861d2bbc784} 
+bool {\bfseries add} (const \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} \&service, uint16\+\_\+t command, const void \texorpdfstring{$\ast$}{*}data=nullptr, uint8\+\_\+t size=0)
+\item 
+\Hypertarget{classjacdac_1_1_command_batch_a730c3955d097f3fc2024968723d0556e}\label{classjacdac_1_1_command_batch_a730c3955d097f3fc2024968723d0556e} 
+{\footnotesize template$<$typename T$>$ }\\bool {\bfseries add} (const \doxymbox{\hyperlink{structjacdac_1_1_service}{Service}} \&service, uint16\+\_\+t command, const T \&value)
+\item 
+\Hypertarget{classjacdac_1_1_command_batch_a1213a09a736f8bb378b2a77a8a8e3746}\label{classjacdac_1_1_command_batch_a1213a09a736f8bb378b2a77a8a8e3746} 
+uint8\+\_\+t {\bfseries packet\+Count} () const
+\item 
+\Hypertarget{classjacdac_1_1_command_batch_aa5b1e75933410989e2e1af220c8a72bc}\label{classjacdac_1_1_command_batch_aa5b1e75933410989e2e1af220c8a72bc} 
+Error {\bfseries error} () const
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classjacdac_1_1_command_batch_a96d8550db89cd8c6abb7e0d3e8923eb2}\label{classjacdac_1_1_command_batch_a96d8550db89cd8c6abb7e0d3e8923eb2} 
+class {\bfseries Bus}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+src/Jacdac.\+h\item 
+src/Jacdac.\+cpp\end{DoxyCompactItemize}

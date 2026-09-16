@@ -1,0 +1,104 @@
+\doxysection{Jacdac\+Protocol.\+h}
+\hypertarget{_jacdac_protocol_8h_source}{}\label{_jacdac_protocol_8h_source}\index{src/JacdacProtocol.h@{src/JacdacProtocol.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <stddef.h>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <stdint.h>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}JacdacConfig.h"{}}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{keyword}{namespace\ }jacdac\ \{}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{size\_t}\ SERIAL\_PAYLOAD\_SIZE\ =\ JACDAC\_FRAME\_DATA\_SIZE\ -\/\ 4;}
+\DoxyCodeLine{00010\ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{size\_t}\ SERIAL\_HEADER\_SIZE\ =\ 16;}
+\DoxyCodeLine{00011\ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{size\_t}\ FRAME\_HEADER\_SIZE\ =\ 12;}
+\DoxyCodeLine{00012\ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{size\_t}\ FRAME\_DATA\_SIZE\ =\ JACDAC\_FRAME\_DATA\_SIZE;}
+\DoxyCodeLine{00013\ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{size\_t}\ MAX\_FRAME\_SIZE\ =\ FRAME\_HEADER\_SIZE\ +\ FRAME\_DATA\_SIZE;}
+\DoxyCodeLine{00014\ \textcolor{keyword}{constexpr}\ uint8\_t\ FRAME\_FLAG\_COMMAND\ =\ 0x01;}
+\DoxyCodeLine{00015\ \textcolor{keyword}{constexpr}\ uint8\_t\ FRAME\_FLAG\_ACK\_REQUESTED\ =\ 0x02;}
+\DoxyCodeLine{00016\ \textcolor{keyword}{constexpr}\ uint8\_t\ FRAME\_FLAG\_IDENTIFIER\_IS\_SERVICE\_CLASS\ =\ 0x04;}
+\DoxyCodeLine{00017\ \textcolor{keyword}{constexpr}\ uint8\_t\ FRAME\_FLAG\_VNEXT\ =\ 0x80;}
+\DoxyCodeLine{00018\ \textcolor{keyword}{constexpr}\ uint8\_t\ SERVICE\_INDEX\_MASK\ =\ 0x3f;}
+\DoxyCodeLine{00019\ \textcolor{keyword}{constexpr}\ uint8\_t\ SERVICE\_INDEX\_CONTROL\ =\ 0x00;}
+\DoxyCodeLine{00020\ \textcolor{keyword}{constexpr}\ uint8\_t\ SERVICE\_INDEX\_MAX\_REGULAR\ =\ 0x3a;}
+\DoxyCodeLine{00021\ \textcolor{keyword}{constexpr}\ uint8\_t\ SERVICE\_INDEX\_BROADCAST\ =\ 0x3d;}
+\DoxyCodeLine{00022\ \textcolor{keyword}{constexpr}\ uint8\_t\ SERVICE\_INDEX\_PIPE\ =\ 0x3e;}
+\DoxyCodeLine{00023\ \textcolor{keyword}{constexpr}\ uint8\_t\ SERVICE\_INDEX\_CRC\_ACK\ =\ 0x3f;}
+\DoxyCodeLine{00024\ \textcolor{keyword}{constexpr}\ uint16\_t\ CMD\_ANNOUNCE\ =\ 0x0000;}
+\DoxyCodeLine{00025\ \textcolor{keyword}{constexpr}\ uint16\_t\ CMD\_EVENT\ =\ 0x0001;}
+\DoxyCodeLine{00026\ \textcolor{keyword}{constexpr}\ uint16\_t\ CMD\_GET\_REGISTER\ =\ 0x1000;}
+\DoxyCodeLine{00027\ \textcolor{keyword}{constexpr}\ uint16\_t\ CMD\_SET\_REGISTER\ =\ 0x2000;}
+\DoxyCodeLine{00028\ \textcolor{keyword}{constexpr}\ uint16\_t\ CMD\_CALIBRATE\ =\ 0x0002;}
+\DoxyCodeLine{00029\ \textcolor{keyword}{constexpr}\ uint16\_t\ CMD\_COMMAND\_NOT\_IMPLEMENTED\ =\ 0x0003;}
+\DoxyCodeLine{00030\ \textcolor{keyword}{constexpr}\ uint16\_t\ REGISTER\_CODE\_MASK\ =\ 0x0fff;}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#pragma\ pack(push,\ 1)}}
+\DoxyCodeLine{00033\ \textcolor{keyword}{struct\ }\doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ \{}
+\DoxyCodeLine{00034\ \ \ \ \ uint16\_t\ crc;}
+\DoxyCodeLine{00035\ \ \ \ \ uint8\_t\ size;}
+\DoxyCodeLine{00036\ \ \ \ \ uint8\_t\ flags;}
+\DoxyCodeLine{00037\ \ \ \ \ uint64\_t\ deviceIdentifier;}
+\DoxyCodeLine{00038\ \ \ \ \ uint8\_t\ data[FRAME\_DATA\_SIZE];}
+\DoxyCodeLine{00039\ \};}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{keyword}{struct\ }\doxymbox{\hyperlink{structjacdac_1_1_packet_header}{PacketHeader}}\ \{}
+\DoxyCodeLine{00042\ \ \ \ \ uint16\_t\ crc;}
+\DoxyCodeLine{00043\ \ \ \ \ uint8\_t\ frameSize;}
+\DoxyCodeLine{00044\ \ \ \ \ uint8\_t\ flags;}
+\DoxyCodeLine{00045\ \ \ \ \ uint64\_t\ deviceIdentifier;}
+\DoxyCodeLine{00046\ \ \ \ \ uint8\_t\ serviceSize;}
+\DoxyCodeLine{00047\ \ \ \ \ uint8\_t\ serviceIndex;}
+\DoxyCodeLine{00048\ \ \ \ \ uint16\_t\ serviceCommand;}
+\DoxyCodeLine{00049\ \};}
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\#pragma\ pack(pop)}}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ \textcolor{keyword}{struct\ }\doxymbox{\hyperlink{structjacdac_1_1_packet_view}{PacketView}}\ \{}
+\DoxyCodeLine{00053\ \ \ \ \ uint64\_t\ deviceIdentifier;}
+\DoxyCodeLine{00054\ \ \ \ \ \textcolor{keyword}{const}\ uint8\_t\ *data;}
+\DoxyCodeLine{00055\ \ \ \ \ uint16\_t\ serviceCommand;}
+\DoxyCodeLine{00056\ \ \ \ \ uint8\_t\ serviceIndex;}
+\DoxyCodeLine{00057\ \ \ \ \ uint8\_t\ dataSize;}
+\DoxyCodeLine{00058\ \ \ \ \ uint8\_t\ flags;}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keywordtype}{bool}\ isCommand()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (flags\ \&\ FRAME\_FLAG\_COMMAND)\ !=\ 0;}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \ \ \ \ \}}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keywordtype}{bool}\ isReport()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ !isCommand();}
+\DoxyCodeLine{00067\ \ \ \ \ \}}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \ \ \ \ \textcolor{keywordtype}{bool}\ isRegisterGet()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (serviceCommand\ \&\ 0xf000)\ ==\ CMD\_GET\_REGISTER;}
+\DoxyCodeLine{00071\ \ \ \ \ \}}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \ \ \ \ \textcolor{keywordtype}{bool}\ isEvent()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ isReport()\ \&\&\ serviceIndex\ <=\ SERVICE\_INDEX\_MAX\_REGULAR\ \&\&\ (serviceCommand\ \&\ 0x8000)\ !=\ 0;}
+\DoxyCodeLine{00075\ \ \ \ \ \}}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \ \ uint16\_t\ registerCode()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ serviceCommand\ \&\ REGISTER\_CODE\_MASK;}
+\DoxyCodeLine{00079\ \ \ \ \ \}}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \ uint16\_t\ eventCode()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ serviceCommand\ \&\ 0x00ff;}
+\DoxyCodeLine{00083\ \ \ \ \ \}}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \ \ \ \ uint8\_t\ eventCounter()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}uint8\_t\textcolor{keyword}{>}((serviceCommand\ >>\ 8)\ \&\ 0x7f);}
+\DoxyCodeLine{00087\ \ \ \ \ \}}
+\DoxyCodeLine{00088\ \};}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ uint16\_t\ crc16(\textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *data,\ \textcolor{keywordtype}{size\_t}\ size);}
+\DoxyCodeLine{00091\ \textcolor{keywordtype}{size\_t}\ frameSize(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ \&frame);}
+\DoxyCodeLine{00092\ \textcolor{keywordtype}{bool}\ validateFrame(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ \&frame,\ \textcolor{keywordtype}{size\_t}\ receivedSize);}
+\DoxyCodeLine{00093\ \textcolor{keywordtype}{void}\ resetFrame(\doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ \&frame,\ uint64\_t\ deviceIdentifier,\ uint8\_t\ flags);}
+\DoxyCodeLine{00094\ \textcolor{keywordtype}{bool}\ appendPacket(\doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ \&frame,\ uint8\_t\ serviceIndex,\ uint16\_t\ serviceCommand,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *data\ =\ \textcolor{keyword}{nullptr},\ uint8\_t\ dataSize\ =\ 0);}
+\DoxyCodeLine{00095\ \textcolor{keywordtype}{void}\ finalizeFrame(\doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ \&frame);}
+\DoxyCodeLine{00096\ \textcolor{keywordtype}{bool}\ packetAt(\textcolor{keyword}{const}\ \doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}}\ \&frame,\ \textcolor{keywordtype}{size\_t}\ \&offset,\ \doxymbox{\hyperlink{structjacdac_1_1_packet_view}{PacketView}}\ \&packet);}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \}\ \textcolor{comment}{//\ namespace\ jacdac}}
+
+\end{DoxyCode}

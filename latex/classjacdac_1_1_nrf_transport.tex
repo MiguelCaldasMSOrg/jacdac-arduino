@@ -1,0 +1,44 @@
+\doxysection{jacdac::Nrf\+Transport Class Reference}
+\hypertarget{classjacdac_1_1_nrf_transport}{}\label{classjacdac_1_1_nrf_transport}\index{jacdac::NrfTransport@{jacdac::NrfTransport}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classjacdac_1_1_nrf_transport_af6701a718ff800e2f6003a66964fe558}\label{classjacdac_1_1_nrf_transport_af6701a718ff800e2f6003a66964fe558} 
+bool {\bfseries begin} (uint8\+\_\+t pin, Transport\+Receive\+Handler receive\+Handler, Transport\+Transmit\+Handler transmit\+Handler, void \texorpdfstring{$\ast$}{*}context)
+\item 
+\Hypertarget{classjacdac_1_1_nrf_transport_ad03df0bb8a10c39789d77c634b3fabbf}\label{classjacdac_1_1_nrf_transport_ad03df0bb8a10c39789d77c634b3fabbf} 
+void {\bfseries end} ()
+\item 
+\Hypertarget{classjacdac_1_1_nrf_transport_af3bd55caf7c599a439ad13149c5e0b7c}\label{classjacdac_1_1_nrf_transport_af3bd55caf7c599a439ad13149c5e0b7c} 
+bool {\bfseries send} (const \doxymbox{\hyperlink{structjacdac_1_1_frame}{Frame}} \&frame)
+\item 
+\Hypertarget{classjacdac_1_1_nrf_transport_af2b98c9b9dcb94a38c99948080fff0fd}\label{classjacdac_1_1_nrf_transport_af2b98c9b9dcb94a38c99948080fff0fd} 
+uint64\+\_\+t {\bfseries device\+Identifier} () const
+\item 
+\Hypertarget{classjacdac_1_1_nrf_transport_a05f9112daad528f3919ecd693819ff05}\label{classjacdac_1_1_nrf_transport_a05f9112daad528f3919ecd693819ff05} 
+uint32\+\_\+t {\bfseries bus\+Errors} () const
+\item 
+\Hypertarget{classjacdac_1_1_nrf_transport_a89041117019eb8e98bcb8ab0d163d7cb}\label{classjacdac_1_1_nrf_transport_a89041117019eb8e98bcb8ab0d163d7cb} 
+uint32\+\_\+t {\bfseries collisions} () const
+\item 
+\Hypertarget{classjacdac_1_1_nrf_transport_a958d82ead0dca212ae1eedef945359e5}\label{classjacdac_1_1_nrf_transport_a958d82ead0dca212ae1eedef945359e5} 
+const \doxymbox{\hyperlink{structjacdac_1_1_transport_diagnostics}{Transport\+Diagnostics}} \& {\bfseries diagnostics} () const
+\item 
+\Hypertarget{classjacdac_1_1_nrf_transport_ae56f225bc016ce8cfb6762d213d536b3}\label{classjacdac_1_1_nrf_transport_ae56f225bc016ce8cfb6762d213d536b3} 
+void {\bfseries handle\+Line\+Falling} ()
+\item 
+\Hypertarget{classjacdac_1_1_nrf_transport_ad4dc59240c20f9e882e7615a6a23682d}\label{classjacdac_1_1_nrf_transport_ad4dc59240c20f9e882e7615a6a23682d} 
+void {\bfseries handle\+Timer} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classjacdac_1_1_nrf_transport_a80ef4f46e539b42c6bf3770d84c984d2}\label{classjacdac_1_1_nrf_transport_a80ef4f46e539b42c6bf3770d84c984d2} 
+static Nrf\+Transport \& {\bfseries instance} ()
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+src/Jacdac\+Transport.\+h\item 
+src/Jacdac\+Transport.\+cpp\end{DoxyCompactItemize}
