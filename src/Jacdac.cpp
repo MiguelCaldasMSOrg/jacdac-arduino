@@ -519,7 +519,7 @@ void Bus::handleRegisterResponse(const PacketView &packet) {
 }
 
 void Bus::handleCommandError(const PacketView &packet) {
-    if (!packet.isReport() || packet.serviceCommand != CMD_COMMAND_NOT_IMPLEMENTED) return;
+    if (!packet.isReport() || packet.serviceIndex > SERVICE_INDEX_MAX_REGULAR || packet.serviceCommand != CMD_COMMAND_NOT_IMPLEMENTED) return;
     if (packet.dataSize < 4) {
         ++diagnostics_.malformedPackets;
         return;

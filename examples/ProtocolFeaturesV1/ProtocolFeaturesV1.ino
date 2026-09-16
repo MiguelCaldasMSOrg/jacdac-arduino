@@ -38,7 +38,7 @@ void loop() {
     if (static_cast<int32_t>(now - nextRequest) >= 0) {
         nextRequest = now + 1000;
         responseReceived = false;
-        Jacdac.getRegisterAsync(button, reg::BUTTON_PRESSED, registerReceived, nullptr, 500);
+        Jacdac.getRegisterAsync(button, reg::READING, registerReceived, nullptr, 500);
     }
     digitalWrite(LED_BUILTIN, responseReceived ? HIGH : LOW);
 }

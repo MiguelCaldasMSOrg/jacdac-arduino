@@ -11,10 +11,10 @@ void registerReceived(const PacketView *packet, void *) {
         Serial.println("register timeout");
         return;
     }
-    uint8_t pressed;
-    if (readValue(*packet, pressed)) {
+    uint16_t pressure;
+    if (readValue(*packet, pressure)) {
         Serial.print("button pressed: ");
-        Serial.println(pressed != 0 ? "yes" : "no");
+        Serial.println(pressure != 0 ? "yes" : "no");
     }
 }
 
@@ -70,7 +70,7 @@ void loop() {
     bool queued = false;
     switch (action) {
     case 0:
-        queued = Jacdac.getRegisterAsync(button, reg::BUTTON_PRESSED, registerReceived, nullptr, 1000);
+        queued = Jacdac.getRegisterAsync(button, reg::READING, registerReceived, nullptr, 1000);
         break;
     case 1:
         queued = Jacdac.requestDeviceDescription(button.deviceIdentifier);
@@ -93,7 +93,7 @@ void loop() {
         break;
     }
     default:
-        queued = Jacdac.sendMulticast(service::BUTTON, CMD_GET_REGISTER | reg::BUTTON_PRESSED);
+        queued = Jacdac.sendMulticast(service::BUTTON, CMD_GET_REGISTER | reg::READING);
         break;
     }
     if (queued) {

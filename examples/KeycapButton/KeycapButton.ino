@@ -35,9 +35,6 @@ static void packetReceived(const PacketView &packet, void *) {
                 Serial.print(pressure * 100UL / 65535UL);
                 Serial.println("%");
             }
-        } else if (packet.registerCode() == reg::BUTTON_PRESSED && packet.dataSize >= 1) {
-            Serial.print("pressed: ");
-            Serial.println(packet.data[0] ? "yes" : "no");
         } else if (packet.registerCode() == reg::BUTTON_ANALOG && packet.dataSize >= 1) {
             Serial.print("analog: ");
             Serial.println(packet.data[0] ? "yes" : "no");
@@ -56,7 +53,6 @@ void loop() {
     static uint32_t nextQuery;
     if (keycap.connected() && static_cast<int32_t>(millis() - nextQuery) >= 0) {
         keycap.requestPressure();
-        keycap.requestPressed();
         keycap.requestAnalog();
         nextQuery = millis() + 250;
     }

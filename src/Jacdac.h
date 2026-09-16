@@ -298,6 +298,7 @@ public:
     bool requestPressure() const;
     bool requestPressed() const;
     bool requestAnalog() const;
+    bool readPressed(const PacketView &packet, bool &pressed) const;
 };
 
 class RotaryEncoderClient : public SensorClient {
@@ -314,6 +315,46 @@ public:
     explicit PotentiometerClient(Bus &bus, uint8_t instance = 0);
     bool requestPosition() const;
     bool requestVariant() const;
+};
+
+class LightLevelClient : public SensorClient {
+public:
+    explicit LightLevelClient(Bus &bus, uint8_t instance = 0);
+    bool requestLightLevel() const;
+    bool requestVariant() const;
+};
+
+class MagneticFieldLevelClient : public SensorClient {
+public:
+    explicit MagneticFieldLevelClient(Bus &bus, uint8_t instance = 0);
+    bool requestStrength() const;
+    bool requestVariant() const;
+};
+
+class AccelerometerClient : public SensorClient {
+public:
+    explicit AccelerometerClient(Bus &bus, uint8_t instance = 0);
+    bool requestForces() const;
+};
+
+class DistanceClient : public SensorClient {
+public:
+    explicit DistanceClient(Bus &bus, uint8_t instance = 0);
+    bool requestDistance() const;
+    bool requestVariant() const;
+};
+
+class TemperatureClient : public SensorClient {
+public:
+    explicit TemperatureClient(Bus &bus, uint8_t instance = 0);
+    bool requestTemperature() const;
+    bool requestVariant() const;
+};
+
+class HumidityClient : public SensorClient {
+public:
+    explicit HumidityClient(Bus &bus, uint8_t instance = 0);
+    bool requestHumidity() const;
 };
 
 class LedStripClient : public ServiceClient {
@@ -338,6 +379,10 @@ public:
     explicit LedClient(Bus &bus, uint8_t instance = 0);
     bool setBrightness(uint8_t brightness, bool requestAck = false) const;
     bool setPixels(const uint8_t *rgb, uint8_t byteCount, bool requestAck = false) const;
+    bool requestPixels() const;
+    bool requestNumPixels() const;
+    bool requestVariant() const;
+    bool requestActualBrightness() const;
 };
 
 class ServoClient : public ServiceClient {
@@ -346,43 +391,20 @@ public:
     bool setAngle(float angleDegrees, bool requestAck = false) const;
     bool setAngleQ16(int32_t angleDegreesQ16, bool requestAck = false) const;
     bool setEnabled(bool enabled, bool requestAck = false) const;
+    bool requestAngle() const;
+    bool requestEnabled() const;
+    bool requestMinAngle() const;
+    bool requestMaxAngle() const;
+    bool requestActualAngle() const;
 };
 
 class RelayClient : public ActuatorClient {
 public:
     explicit RelayClient(Bus &bus, uint8_t instance = 0);
     bool setActive(bool active, bool requestAck = false) const;
+    bool requestActive() const;
     bool requestVariant() const;
     bool requestMaxSwitchingCurrent() const;
-};
-
-class LightBulbClient : public ActuatorClient {
-public:
-    explicit LightBulbClient(Bus &bus, uint8_t instance = 0);
-    bool setBrightness(uint16_t brightness, bool requestAck = false) const;
-    bool requestDimmable() const;
-};
-
-class MotorClient : public ActuatorClient {
-public:
-    explicit MotorClient(Bus &bus, uint8_t instance = 0);
-    bool setSpeed(int16_t speedQ15, bool requestAck = false) const;
-    bool setEnabled(bool enabled, bool requestAck = false) const;
-};
-
-class DualMotorsClient : public ActuatorClient {
-public:
-    explicit DualMotorsClient(Bus &bus, uint8_t instance = 0);
-    bool setSpeeds(int16_t leftQ15, int16_t rightQ15, bool requestAck = false) const;
-    bool setEnabled(bool enabled, bool requestAck = false) const;
-};
-
-class BuzzerClient : public ActuatorClient {
-public:
-    explicit BuzzerClient(Bus &bus, uint8_t instance = 0);
-    bool setVolume(uint8_t volume, bool requestAck = false) const;
-    bool playTone(uint16_t periodMicroseconds, uint16_t dutyMicroseconds, uint16_t durationMilliseconds, bool requestAck = false) const;
-    bool playNote(uint16_t frequency, uint16_t volume, uint16_t durationMilliseconds, bool requestAck = false) const;
 };
 
 struct VibrationStep {
@@ -398,63 +420,21 @@ public:
     bool requestMaxVibrations() const;
 };
 
-class HidKeyboardClient : public ServiceClient {
-public:
-    explicit HidKeyboardClient(Bus &bus, uint8_t instance = 0);
-    bool key(uint16_t selector, uint8_t modifiers = 0, uint8_t action = 0, bool requestAck = false) const;
-    bool clear(bool requestAck = false) const;
-};
-
-class HidMouseClient : public ServiceClient {
-public:
-    explicit HidMouseClient(Bus &bus, uint8_t instance = 0);
-    bool setButton(uint16_t buttons, uint8_t event, bool requestAck = false) const;
-    bool move(int16_t deltaX, int16_t deltaY, uint16_t timeMilliseconds = 0, bool requestAck = false) const;
-    bool wheel(int16_t deltaY, uint16_t timeMilliseconds = 0, bool requestAck = false) const;
-};
-
-class HidJoystickClient : public ServiceClient {
-public:
-    explicit HidJoystickClient(Bus &bus, uint8_t instance = 0);
-    bool setButtons(const uint8_t *pressures, uint8_t count, bool requestAck = false) const;
-    bool setAxes(const int16_t *positionsQ15, uint8_t count, bool requestAck = false) const;
-    bool requestButtonCount() const;
-    bool requestAnalogButtons() const;
-    bool requestAxisCount() const;
-};
-
-class CharacterScreenClient : public ActuatorClient {
-public:
-    explicit CharacterScreenClient(Bus &bus, uint8_t instance = 0);
-    bool setMessage(const char *message, uint8_t size, bool requestAck = false) const;
-    bool setBrightness(uint16_t brightness, bool requestAck = false) const;
-    bool requestRows() const;
-    bool requestColumns() const;
-    bool requestVariant() const;
-};
-
-class CursorCharacterScreenClient : public ActuatorClient {
-public:
-    explicit CursorCharacterScreenClient(Bus &bus, uint8_t instance = 0);
-    bool setEnabled(uint16_t enabled, bool requestAck = false) const;
-    bool home(bool requestAck = false) const;
-    bool clear(bool requestAck = false) const;
-    bool setCursor(uint8_t x, uint8_t y, bool requestAck = false) const;
-    bool show(const char *message, uint8_t size, bool requestAck = false) const;
-    bool requestRows() const;
-    bool requestColumns() const;
-};
-
 class PowerClient : public ActuatorClient {
 public:
     explicit PowerClient(Bus &bus, uint8_t instance = 0);
     bool setAllowed(bool allowed, bool requestAck = false) const;
     bool setMaxPower(uint16_t milliamps, bool requestAck = false) const;
+    bool setKeepOnPulse(uint16_t durationMilliseconds, uint16_t periodMilliseconds, bool requestAck = false) const;
+    bool requestAllowed() const;
+    bool requestMaxPower() const;
     bool requestCurrentDraw() const;
     bool requestBatteryVoltage() const;
     bool requestPowerStatus() const;
     bool requestBatteryCharge() const;
     bool requestBatteryCapacity() const;
+    bool requestKeepOnPulseDuration() const;
+    bool requestKeepOnPulsePeriod() const;
 };
 
 extern Bus Jacdac;

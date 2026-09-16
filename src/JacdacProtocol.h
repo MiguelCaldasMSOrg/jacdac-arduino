@@ -60,7 +60,7 @@ struct PacketView {
     bool isCommand() const { return (flags & FRAME_FLAG_COMMAND) != 0; }
     bool isReport() const { return !isCommand(); }
     bool isRegisterGet() const { return (serviceCommand & 0xf000) == CMD_GET_REGISTER; }
-    bool isEvent() const { return isReport() && (serviceCommand & 0x8000) != 0; }
+    bool isEvent() const { return isReport() && serviceIndex <= SERVICE_INDEX_MAX_REGULAR && (serviceCommand & 0x8000) != 0; }
     uint16_t registerCode() const { return serviceCommand & REGISTER_CODE_MASK; }
     uint16_t eventCode() const { return serviceCommand & 0x00ff; }
     uint8_t eventCounter() const { return static_cast<uint8_t>((serviceCommand >> 8) & 0x7f); }

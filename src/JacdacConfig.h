@@ -1,7 +1,13 @@
 #pragma once
 
 #ifndef JACDAC_MAX_DEVICES
+#if defined(NRF52833_XXAA)
+#define JACDAC_MAX_DEVICES 32
+#elif defined(NRF51)
+#define JACDAC_MAX_DEVICES 16
+#else
 #define JACDAC_MAX_DEVICES 8
+#endif
 #endif
 #ifndef JACDAC_MAX_SERVICES_PER_DEVICE
 #define JACDAC_MAX_SERVICES_PER_DEVICE 16

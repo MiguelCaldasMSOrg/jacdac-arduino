@@ -103,11 +103,28 @@ bool ButtonClient::requestPressure() const {
 }
 
 bool ButtonClient::requestPressed() const {
-    return bus_.getRegister(resolve(), reg::BUTTON_PRESSED);
+    return requestPressure();
 }
 
 bool ButtonClient::requestAnalog() const {
     return bus_.getRegister(resolve(), reg::BUTTON_ANALOG);
+}
+
+bool ButtonClient::readPressed(const PacketView &packet, bool &pressed) const {
+    const Service target = resolve();
+    if (!target.valid() || !packet.isReport() || packet.deviceIdentifier != target.deviceIdentifier || packet.serviceIndex != target.serviceIndex) return false;
+    if (packet.isEvent()) {
+        if (packet.eventCode() == event::BUTTON_DOWN || packet.eventCode() == event::BUTTON_HOLD) pressed = true;
+        else if (packet.eventCode() == event::BUTTON_UP) pressed = false;
+        else return false;
+    } else if (packet.isRegisterGet() && packet.registerCode() == reg::READING) {
+        uint16_t pressure;
+        if (!readValue(packet, pressure)) return false;
+        pressed = pressure != 0;
+    } else {
+        return false;
+    }
+    return true;
 }
 
 RotaryEncoderClient::RotaryEncoderClient(Bus &bus, uint8_t instance) : SensorClient(bus, service::ROTARY_ENCODER, instance) {}
@@ -141,6 +158,52 @@ bool PotentiometerClient::requestPosition() const {
 
 bool PotentiometerClient::requestVariant() const {
     return bus_.getRegister(resolve(), reg::VARIANT);
+}
+
+LightLevelClient::LightLevelClient(Bus &bus, uint8_t instance) : SensorClient(bus, service::LIGHT_LEVEL, instance) {}
+
+bool LightLevelClient::requestLightLevel() const {
+    return requestReading();
+}
+
+bool LightLevelClient::requestVariant() const {
+    return bus_.getRegister(resolve(), reg::VARIANT);
+}
+
+MagneticFieldLevelClient::MagneticFieldLevelClient(Bus &bus, uint8_t instance) : SensorClient(bus, service::MAGNETIC_FIELD_LEVEL, instance) {}
+bool MagneticFieldLevelClient::requestStrength() const { return requestReading(); }
+bool MagneticFieldLevelClient::requestVariant() const { return bus_.getRegister(resolve(), reg::VARIANT); }
+
+AccelerometerClient::AccelerometerClient(Bus &bus, uint8_t instance) : SensorClient(bus, service::ACCELEROMETER, instance) {}
+
+bool AccelerometerClient::requestForces() const {
+    return requestReading();
+}
+
+DistanceClient::DistanceClient(Bus &bus, uint8_t instance) : SensorClient(bus, service::DISTANCE, instance) {}
+
+bool DistanceClient::requestDistance() const {
+    return requestReading();
+}
+
+bool DistanceClient::requestVariant() const {
+    return bus_.getRegister(resolve(), reg::VARIANT);
+}
+
+TemperatureClient::TemperatureClient(Bus &bus, uint8_t instance) : SensorClient(bus, service::TEMPERATURE, instance) {}
+
+bool TemperatureClient::requestTemperature() const {
+    return requestReading();
+}
+
+bool TemperatureClient::requestVariant() const {
+    return bus_.getRegister(resolve(), reg::VARIANT);
+}
+
+HumidityClient::HumidityClient(Bus &bus, uint8_t instance) : SensorClient(bus, service::HUMIDITY, instance) {}
+
+bool HumidityClient::requestHumidity() const {
+    return requestReading();
 }
 
 LedStripClient::LedStripClient(Bus &bus, uint8_t instance) : ServiceClient(bus, service::LED_STRIP, instance) {}
@@ -217,6 +280,11 @@ bool LedClient::setPixels(const uint8_t *rgb, uint8_t byteCount, bool requestAck
     return bus_.setRegister(resolve(), reg::VALUE, static_cast<const void *>(rgb), byteCount, requestAck);
 }
 
+bool LedClient::requestPixels() const { return bus_.getRegister(resolve(), reg::VALUE); }
+bool LedClient::requestNumPixels() const { return bus_.getRegister(resolve(), reg::LED_NUM_PIXELS); }
+bool LedClient::requestVariant() const { return bus_.getRegister(resolve(), reg::VARIANT); }
+bool LedClient::requestActualBrightness() const { return bus_.getRegister(resolve(), reg::LED_ACTUAL_BRIGHTNESS); }
+
 ServoClient::ServoClient(Bus &bus, uint8_t instance) : ServiceClient(bus, service::SERVO, instance) {}
 
 bool ServoClient::setAngle(float angleDegrees, bool requestAck) const {
@@ -232,72 +300,60 @@ bool ServoClient::setEnabled(bool enabled, bool requestAck) const {
     return bus_.setRegister(resolve(), reg::INTENSITY, intensity, requestAck);
 }
 
+bool ServoClient::requestAngle() const {
+    return bus_.getRegister(resolve(), reg::VALUE);
+}
+
+bool ServoClient::requestEnabled() const {
+    return bus_.getRegister(resolve(), reg::INTENSITY);
+}
+
+bool ServoClient::requestMinAngle() const {
+    return bus_.getRegister(resolve(), reg::MIN_VALUE);
+}
+
+bool ServoClient::requestMaxAngle() const {
+    return bus_.getRegister(resolve(), reg::MAX_VALUE);
+}
+
+bool ServoClient::requestActualAngle() const {
+    return bus_.getRegister(resolve(), reg::READING);
+}
+
 RelayClient::RelayClient(Bus &bus, uint8_t instance) : ActuatorClient(bus, service::RELAY, instance) {}
 bool RelayClient::setActive(bool active, bool requestAck) const { const uint8_t value = active ? 1 : 0; return bus_.setRegister(resolve(), reg::INTENSITY, value, requestAck); }
+bool RelayClient::requestActive() const { return bus_.getRegister(resolve(), reg::INTENSITY); }
 bool RelayClient::requestVariant() const { return bus_.getRegister(resolve(), reg::VARIANT); }
 bool RelayClient::requestMaxSwitchingCurrent() const { return bus_.getRegister(resolve(), 0x180); }
-
-LightBulbClient::LightBulbClient(Bus &bus, uint8_t instance) : ActuatorClient(bus, service::LIGHT_BULB, instance) {}
-bool LightBulbClient::setBrightness(uint16_t brightness, bool requestAck) const { return bus_.setRegister(resolve(), reg::INTENSITY, brightness, requestAck); }
-bool LightBulbClient::requestDimmable() const { return bus_.getRegister(resolve(), 0x180); }
-
-MotorClient::MotorClient(Bus &bus, uint8_t instance) : ActuatorClient(bus, service::MOTOR, instance) {}
-bool MotorClient::setSpeed(int16_t speedQ15, bool requestAck) const { return bus_.setRegister(resolve(), reg::VALUE, speedQ15, requestAck); }
-bool MotorClient::setEnabled(bool enabled, bool requestAck) const { const uint8_t value = enabled ? 1 : 0; return bus_.setRegister(resolve(), reg::INTENSITY, value, requestAck); }
-
-DualMotorsClient::DualMotorsClient(Bus &bus, uint8_t instance) : ActuatorClient(bus, service::DUAL_MOTORS, instance) {}
-bool DualMotorsClient::setSpeeds(int16_t leftQ15, int16_t rightQ15, bool requestAck) const { const int16_t speeds[] = {leftQ15, rightQ15}; return bus_.setRegister(resolve(), reg::VALUE, speeds, sizeof(speeds), requestAck); }
-bool DualMotorsClient::setEnabled(bool enabled, bool requestAck) const { const uint8_t value = enabled ? 1 : 0; return bus_.setRegister(resolve(), reg::INTENSITY, value, requestAck); }
-
-BuzzerClient::BuzzerClient(Bus &bus, uint8_t instance) : ActuatorClient(bus, service::BUZZER, instance) {}
-bool BuzzerClient::setVolume(uint8_t volume, bool requestAck) const { return bus_.setRegister(resolve(), reg::INTENSITY, volume, requestAck); }
-bool BuzzerClient::playTone(uint16_t periodMicroseconds, uint16_t dutyMicroseconds, uint16_t durationMilliseconds, bool requestAck) const { const uint16_t data[] = {periodMicroseconds, dutyMicroseconds, durationMilliseconds}; return bus_.sendCommand(resolve(), command::BUZZER_PLAY_TONE, data, sizeof(data), requestAck); }
-bool BuzzerClient::playNote(uint16_t frequency, uint16_t volume, uint16_t durationMilliseconds, bool requestAck) const { const uint16_t data[] = {frequency, volume, durationMilliseconds}; return bus_.sendCommand(resolve(), command::BUZZER_PLAY_NOTE, data, sizeof(data), requestAck); }
 
 VibrationMotorClient::VibrationMotorClient(Bus &bus, uint8_t instance) : ServiceClient(bus, service::VIBRATION_MOTOR, instance) {}
 bool VibrationMotorClient::vibrate(const VibrationStep *steps, uint8_t count, bool requestAck) const { if (count > SERIAL_PAYLOAD_SIZE / sizeof(VibrationStep)) { return fail(Error::PacketTooLarge); } return bus_.sendCommand(resolve(), command::VIBRATION_MOTOR_VIBRATE, steps, static_cast<uint8_t>(count * sizeof(VibrationStep)), requestAck); }
 bool VibrationMotorClient::stop(bool requestAck) const { return bus_.sendCommand(resolve(), command::VIBRATION_MOTOR_VIBRATE, nullptr, 0, requestAck); }
 bool VibrationMotorClient::requestMaxVibrations() const { return bus_.getRegister(resolve(), reg::VIBRATION_MOTOR_MAX_VIBRATIONS); }
 
-HidKeyboardClient::HidKeyboardClient(Bus &bus, uint8_t instance) : ServiceClient(bus, service::HID_KEYBOARD, instance) {}
-bool HidKeyboardClient::key(uint16_t selector, uint8_t modifiers, uint8_t action, bool requestAck) const { const uint8_t data[] = {static_cast<uint8_t>(selector), static_cast<uint8_t>(selector >> 8), modifiers, action}; return bus_.sendCommand(resolve(), command::HID_KEYBOARD_KEY, data, sizeof(data), requestAck); }
-bool HidKeyboardClient::clear(bool requestAck) const { return bus_.sendCommand(resolve(), command::HID_KEYBOARD_CLEAR, nullptr, 0, requestAck); }
-
-HidMouseClient::HidMouseClient(Bus &bus, uint8_t instance) : ServiceClient(bus, service::HID_MOUSE, instance) {}
-bool HidMouseClient::setButton(uint16_t buttons, uint8_t event, bool requestAck) const { const uint8_t data[] = {static_cast<uint8_t>(buttons), static_cast<uint8_t>(buttons >> 8), event}; return bus_.sendCommand(resolve(), command::HID_MOUSE_SET_BUTTON, data, sizeof(data), requestAck); }
-bool HidMouseClient::move(int16_t deltaX, int16_t deltaY, uint16_t timeMilliseconds, bool requestAck) const { const uint16_t data[] = {static_cast<uint16_t>(deltaX), static_cast<uint16_t>(deltaY), timeMilliseconds}; return bus_.sendCommand(resolve(), command::HID_MOUSE_MOVE, data, sizeof(data), requestAck); }
-bool HidMouseClient::wheel(int16_t deltaY, uint16_t timeMilliseconds, bool requestAck) const { const uint16_t data[] = {static_cast<uint16_t>(deltaY), timeMilliseconds}; return bus_.sendCommand(resolve(), command::HID_MOUSE_WHEEL, data, sizeof(data), requestAck); }
-
-HidJoystickClient::HidJoystickClient(Bus &bus, uint8_t instance) : ServiceClient(bus, service::HID_JOYSTICK, instance) {}
-bool HidJoystickClient::setButtons(const uint8_t *pressures, uint8_t count, bool requestAck) const { return bus_.sendCommand(resolve(), command::HID_JOYSTICK_SET_BUTTONS, pressures, count, requestAck); }
-bool HidJoystickClient::setAxes(const int16_t *positionsQ15, uint8_t count, bool requestAck) const { if (count > SERIAL_PAYLOAD_SIZE / sizeof(int16_t)) { return fail(Error::PacketTooLarge); } return bus_.sendCommand(resolve(), command::HID_JOYSTICK_SET_AXIS, positionsQ15, static_cast<uint8_t>(count * sizeof(int16_t)), requestAck); }
-bool HidJoystickClient::requestButtonCount() const { return bus_.getRegister(resolve(), reg::HID_JOYSTICK_BUTTON_COUNT); }
-bool HidJoystickClient::requestAnalogButtons() const { return bus_.getRegister(resolve(), reg::HID_JOYSTICK_BUTTONS_ANALOG); }
-bool HidJoystickClient::requestAxisCount() const { return bus_.getRegister(resolve(), reg::HID_JOYSTICK_AXIS_COUNT); }
-
-CharacterScreenClient::CharacterScreenClient(Bus &bus, uint8_t instance) : ActuatorClient(bus, service::CHARACTER_SCREEN, instance) {}
-bool CharacterScreenClient::setMessage(const char *message, uint8_t size, bool requestAck) const { return bus_.setRegister(resolve(), reg::VALUE, message, size, requestAck); }
-bool CharacterScreenClient::setBrightness(uint16_t brightness, bool requestAck) const { return bus_.setRegister(resolve(), reg::INTENSITY, brightness, requestAck); }
-bool CharacterScreenClient::requestRows() const { return bus_.getRegister(resolve(), reg::DISPLAY_ROWS); }
-bool CharacterScreenClient::requestColumns() const { return bus_.getRegister(resolve(), reg::DISPLAY_COLUMNS); }
-bool CharacterScreenClient::requestVariant() const { return bus_.getRegister(resolve(), reg::VARIANT); }
-
-CursorCharacterScreenClient::CursorCharacterScreenClient(Bus &bus, uint8_t instance) : ActuatorClient(bus, service::CURSOR_CHARACTER_SCREEN, instance) {}
-bool CursorCharacterScreenClient::setEnabled(uint16_t enabled, bool requestAck) const { return bus_.setRegister(resolve(), reg::INTENSITY, enabled, requestAck); }
-bool CursorCharacterScreenClient::home(bool requestAck) const { return bus_.sendCommand(resolve(), command::CURSOR_SCREEN_HOME, nullptr, 0, requestAck); }
-bool CursorCharacterScreenClient::clear(bool requestAck) const { return bus_.sendCommand(resolve(), command::CURSOR_SCREEN_CLEAR, nullptr, 0, requestAck); }
-bool CursorCharacterScreenClient::setCursor(uint8_t x, uint8_t y, bool requestAck) const { const uint8_t data[] = {x, y}; return bus_.sendCommand(resolve(), command::CURSOR_SCREEN_SET_CURSOR, data, sizeof(data), requestAck); }
-bool CursorCharacterScreenClient::show(const char *message, uint8_t size, bool requestAck) const { return bus_.sendCommand(resolve(), command::CURSOR_SCREEN_SHOW, message, size, requestAck); }
-bool CursorCharacterScreenClient::requestRows() const { return bus_.getRegister(resolve(), reg::DISPLAY_ROWS); }
-bool CursorCharacterScreenClient::requestColumns() const { return bus_.getRegister(resolve(), reg::DISPLAY_COLUMNS); }
-
 PowerClient::PowerClient(Bus &bus, uint8_t instance) : ActuatorClient(bus, service::POWER, instance) {}
 bool PowerClient::setAllowed(bool allowed, bool requestAck) const { const uint8_t value = allowed ? 1 : 0; return bus_.setRegister(resolve(), reg::INTENSITY, value, requestAck); }
 bool PowerClient::setMaxPower(uint16_t milliamps, bool requestAck) const { return bus_.setRegister(resolve(), reg::MAX_POWER, milliamps, requestAck); }
+bool PowerClient::requestAllowed() const { return bus_.getRegister(resolve(), reg::INTENSITY); }
+bool PowerClient::requestMaxPower() const { return bus_.getRegister(resolve(), reg::MAX_POWER); }
 bool PowerClient::requestCurrentDraw() const { return bus_.getRegister(resolve(), reg::READING); }
 bool PowerClient::requestBatteryVoltage() const { return bus_.getRegister(resolve(), reg::POWER_BATTERY_VOLTAGE); }
 bool PowerClient::requestPowerStatus() const { return bus_.getRegister(resolve(), reg::POWER_STATUS); }
 bool PowerClient::requestBatteryCharge() const { return bus_.getRegister(resolve(), reg::POWER_BATTERY_CHARGE); }
 bool PowerClient::requestBatteryCapacity() const { return bus_.getRegister(resolve(), reg::POWER_BATTERY_CAPACITY); }
+bool PowerClient::requestKeepOnPulseDuration() const { return bus_.getRegister(resolve(), reg::POWER_KEEP_ON_PULSE_DURATION); }
+bool PowerClient::requestKeepOnPulsePeriod() const { return bus_.getRegister(resolve(), reg::POWER_KEEP_ON_PULSE_PERIOD); }
+
+bool PowerClient::setKeepOnPulse(uint16_t durationMilliseconds, uint16_t periodMilliseconds, bool requestAck) const {
+    if (periodMilliseconds == 0 || static_cast<uint32_t>(durationMilliseconds) * 10 > periodMilliseconds) return fail(Error::InvalidArgument);
+    const Service target = resolve();
+    if (!target.valid()) return fail(Error::InvalidService);
+    CommandBatch batch(target.deviceIdentifier, requestAck);
+    const uint16_t disabledDuration = 0;
+    if (!batch.add(target, CMD_SET_REGISTER | reg::POWER_KEEP_ON_PULSE_DURATION, disabledDuration) ||
+        !batch.add(target, CMD_SET_REGISTER | reg::POWER_KEEP_ON_PULSE_PERIOD, periodMilliseconds) ||
+        !batch.add(target, CMD_SET_REGISTER | reg::POWER_KEEP_ON_PULSE_DURATION, durationMilliseconds)) return fail(batch.error());
+    return bus_.sendBatch(batch);
+}
 
 } // namespace jacdac

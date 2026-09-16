@@ -26,6 +26,24 @@ static uint32_t gpioIndex(uint32_t pin) {
 }
 #endif
 
+static void waitTimerMicroseconds(uint32_t microseconds) {
+#if defined(NRF52833_XXAA)
+    NRF_TIMER3->TASKS_CAPTURE[2] = 1;
+    const uint32_t start = NRF_TIMER3->CC[2];
+    do {
+        NRF_TIMER3->TASKS_CAPTURE[2] = 1;
+    } while (NRF_TIMER3->CC[2] - start < microseconds);
+#elif defined(NRF51)
+    NRF_TIMER2->TASKS_CAPTURE[2] = 1;
+    const uint16_t start = static_cast<uint16_t>(NRF_TIMER2->CC[2]);
+    do {
+        NRF_TIMER2->TASKS_CAPTURE[2] = 1;
+    } while (static_cast<uint16_t>(NRF_TIMER2->CC[2] - start) < microseconds);
+#else
+    (void)microseconds;
+#endif
+}
+
 static void lineFallingThunk() {
     NrfTransport::instance().handleLineFalling();
 }
@@ -35,7 +53,7 @@ NrfTransport &NrfTransport::instance() {
     return transport;
 }
 
-NrfTransport::NrfTransport() : state_(STOPPED), timerPurpose_(TIMER_NONE), arduinoPin_(0), gpioPin_(0), transmitPending_(false)
+NrfTransport::NrfTransport() : state_(STOPPED), timerPurpose_(TIMER_NONE), arduinoPin_(0), gpioPin_(0), transmitPending_(false), receiveHadHardwareError_(false)
 #if defined(NRF52833_XXAA)
     , receiveTimedOut_(false)
 #endif
@@ -66,6 +84,7 @@ bool NrfTransport::begin(uint8_t pin, TransportReceiveHandler receiveHandler, Tr
     collisions_ = 0;
     memset(&diagnostics_, 0, sizeof(diagnostics_));
     transmitPending_ = false;
+    receiveHadHardwareError_ = false;
 
 #if defined(NRF52833_XXAA)
     NRF_TIMER3->TASKS_STOP = 1;
@@ -222,17 +241,13 @@ void NrfTransport::handleTimer() {
     if (purpose == TIMER_TRANSMIT && state_ == WAITING_TO_TRANSMIT) {
         startTransmit();
     } else if (purpose == TIMER_RX_HEADER && state_ == RECEIVING) {
-        const uint32_t amount = NRF_UARTE1->RXD.AMOUNT;
-        if (amount < 4) {
+        const uint8_t payloadSize = *reinterpret_cast<volatile uint8_t *>(&receiveFrame_.size);
+        const size_t expected = static_cast<size_t>(payloadSize) + FRAME_HEADER_SIZE;
+        if (payloadSize < 4 || expected > sizeof(Frame)) {
             finishReceive(true);
         } else {
-            const size_t expected = frameSize(receiveFrame_);
-            if (expected < SERIAL_HEADER_SIZE || expected > sizeof(Frame)) {
-                finishReceive(true);
-            } else {
-                schedule(static_cast<uint32_t>(expected * 12 + 60));
-                timerPurpose_ = TIMER_RX_FRAME;
-            }
+            schedule(static_cast<uint32_t>(expected * 12 + 60));
+            timerPurpose_ = TIMER_RX_FRAME;
         }
     } else if (purpose == TIMER_RX_FRAME && state_ == RECEIVING) {
         finishReceive(true);
@@ -270,9 +285,10 @@ void NrfTransport::handleTimer() {
 void NrfTransport::handleUarte() {
     if (NRF_UARTE1->EVENTS_ERROR != 0) {
         NRF_UARTE1->EVENTS_ERROR = 0;
-        NRF_UARTE1->ERRORSRC = NRF_UARTE1->ERRORSRC;
+        const uint32_t errorSource = NRF_UARTE1->ERRORSRC;
+        NRF_UARTE1->ERRORSRC = errorSource;
         if (state_ == RECEIVING) {
-            ++diagnostics_.receiveHardwareErrors;
+            receiveHadHardwareError_ = true;
             finishReceive(false);
         } else {
             ++busErrors_;
@@ -305,7 +321,7 @@ void NrfTransport::handleUart() {
         NRF_UART0->EVENTS_ERROR = 0;
         NRF_UART0->ERRORSRC = NRF_UART0->ERRORSRC;
         if (state_ == RECEIVING) {
-            ++diagnostics_.receiveHardwareErrors;
+            receiveHadHardwareError_ = true;
             finishReceive(false);
         } else {
             ++busErrors_;
@@ -369,7 +385,7 @@ void NrfTransport::cancelSchedule() {
 void NrfTransport::scheduleTransmit() {
     state_ = WAITING_TO_TRANSMIT;
     timerPurpose_ = TIMER_TRANSMIT;
-    schedule(randomAround(150));
+    schedule(randomAround(250));
 }
 
 void NrfTransport::startTransmit() {
@@ -385,16 +401,19 @@ void NrfTransport::startTransmit() {
         startReceive();
         return;
     }
+    detachInterrupt(arduinoPin_);
+    waitTimerMicroseconds(2);
     state_ = TRANSMITTING;
     driveLine(false);
-    delayMicroseconds(11);
+    delayMicroseconds(13);
     driveLine(true);
-    delayMicroseconds(50);
+    waitTimerMicroseconds(60);
     configureUarteTransmit();
 #if defined(NRF52833_XXAA)
     NRF_UARTE1->TXD.PTR = reinterpret_cast<uint32_t>(&transmitFrame_);
     NRF_UARTE1->TXD.MAXCNT = frameSize(transmitFrame_);
     NRF_UARTE1->EVENTS_ENDTX = 0;
+    NRF_UARTE1->EVENTS_TXSTOPPED = 0;
     NRF_UARTE1->INTENCLR = 0xffffffff;
     NRF_UARTE1->INTENSET = UARTE_INTENSET_ENDTX_Msk | UARTE_INTENSET_ERROR_Msk;
     NRF_UARTE1->TASKS_STARTTX = 1;
@@ -416,14 +435,16 @@ void NrfTransport::startReceive() {
     ++diagnostics_.receiveStarts;
     configureInput();
     memset(&receiveFrame_, 0, sizeof(receiveFrame_));
+    receiveHadHardwareError_ = false;
 #if defined(NRF51)
     receiveLength_ = 0;
 #endif
     uint32_t timeout = 1000;
-    while (!lineHigh() && timeout-- != 0) {
+    while (!lineHigh() && timeout != 0) {
+        --timeout;
         __NOP();
     }
-    if (timeout == 0) {
+    if (!lineHigh()) {
         ++diagnostics_.receiveTimeouts;
         ++busErrors_;
         state_ = IDLE;
@@ -482,7 +503,11 @@ void NrfTransport::finishReceive(bool timeout) {
     if (timeout) {
         ++diagnostics_.receiveTimeouts;
     }
-    if (validateFrame(receiveFrame_, received)) {
+    const bool valid = validateFrame(receiveFrame_, received);
+    if (receiveHadHardwareError_ && !valid) {
+        ++diagnostics_.receiveHardwareErrors;
+    }
+    if (valid) {
         if (receiveHandler_ != nullptr) {
             receiveHandler_(receiveFrame_, context_);
         }
@@ -516,7 +541,11 @@ void NrfTransport::completeReceive() {
     if (receiveTimedOut_) {
         ++diagnostics_.receiveTimeouts;
     }
-    if (validateFrame(receiveFrame_, received)) {
+    const bool valid = validateFrame(receiveFrame_, received);
+    if (receiveHadHardwareError_ && !valid) {
+        ++diagnostics_.receiveHardwareErrors;
+    }
+    if (valid) {
         if (receiveHandler_ != nullptr) {
             receiveHandler_(receiveFrame_, context_);
         }
@@ -537,7 +566,16 @@ void NrfTransport::completeReceive() {
 void NrfTransport::finishTransmit() {
 #if defined(NRF52833_XXAA) || defined(NRF51)
 #if defined(NRF52833_XXAA)
+    NRF_UARTE1->EVENTS_TXSTOPPED = 0;
     NRF_UARTE1->TASKS_STOPTX = 1;
+    uint32_t timeout = 1000;
+    while (NRF_UARTE1->EVENTS_TXSTOPPED == 0 && timeout != 0) {
+        --timeout;
+        __NOP();
+    }
+    if (NRF_UARTE1->EVENTS_TXSTOPPED == 0) {
+        ++busErrors_;
+    }
     NRF_UARTE1->INTENCLR = 0xffffffff;
     NRF_UARTE1->ENABLE = UARTE_ENABLE_ENABLE_Disabled;
     NRF_UARTE1->PSEL.TXD = 0xffffffff;
@@ -548,9 +586,10 @@ void NrfTransport::finishTransmit() {
     NRF_UART0->PSELTXD = 0xffffffff;
 #endif
     driveLine(false);
-    delayMicroseconds(11);
+    delayMicroseconds(13);
     driveLine(true);
     configureInput();
+    attachInterrupt(arduinoPin_, lineFallingThunk, FALLING);
     transmitPending_ = false;
     state_ = IDLE;
     if (transmitHandler_ != nullptr) {
@@ -589,11 +628,13 @@ void NrfTransport::configureUarteTransmit() {
 #if defined(NRF52833_XXAA)
     NRF_UARTE1->ENABLE = UARTE_ENABLE_ENABLE_Disabled;
     NRF_UARTE1->PSEL.RXD = 0xffffffff;
+    configureInput();
     NRF_UARTE1->PSEL.TXD = gpioPin_;
     NRF_UARTE1->ENABLE = UARTE_ENABLE_ENABLE_Enabled;
 #elif defined(NRF51)
     NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Disabled;
     NRF_UART0->PSELRXD = 0xffffffff;
+    configureInput();
     NRF_UART0->PSELTXD = gpioPin_;
     NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Enabled;
 #endif

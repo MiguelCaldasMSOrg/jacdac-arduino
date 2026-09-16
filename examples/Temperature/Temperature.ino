@@ -2,7 +2,7 @@
 
 using namespace jacdac;
 
-SensorClient thermometer(Jacdac, service::TEMPERATURE);
+TemperatureClient thermometer(Jacdac);
 
 static void packetReceived(const PacketView &packet, void *) {
     const Service currentThermometer = thermometer.resolve();
@@ -28,7 +28,7 @@ void loop() {
     Jacdac.process();
     static uint32_t nextQuery;
     if (thermometer.connected() && static_cast<int32_t>(millis() - nextQuery) >= 0) {
-        thermometer.requestReading();
+        thermometer.requestTemperature();
         nextQuery = millis() + 1000;
     }
 }

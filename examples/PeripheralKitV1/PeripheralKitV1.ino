@@ -36,8 +36,10 @@ static void updateButton(const PacketView &packet, const Service &button, bool &
     } else if (packet.isEvent() && packet.eventCode() == event::BUTTON_UP) {
         pressed = false;
         outputDirty = true;
-    } else if (packet.isRegisterGet() && packet.registerCode() == reg::BUTTON_PRESSED && packet.dataSize >= 1) {
-        const bool nextPressed = packet.data[0] != 0;
+    } else if (packet.isRegisterGet() && packet.registerCode() == reg::READING) {
+        uint16_t pressure;
+        if (!readValue(packet, pressure)) return;
+        const bool nextPressed = pressure != 0;
         if (pressed != nextPressed) {
             pressed = nextPressed;
             outputDirty = true;
@@ -104,12 +106,12 @@ void loop() {
         } else if (queryPhase == 2) {
             const Service rotaryButton = rotary.buttonService();
             if (rotaryButton.valid()) {
-                Jacdac.getRegister(rotaryButton, reg::BUTTON_PRESSED);
+                Jacdac.getRegister(rotaryButton, reg::READING);
             }
         } else {
             const Service keycap = findKeycap();
             if (keycap.valid()) {
-                Jacdac.getRegister(keycap, reg::BUTTON_PRESSED);
+                Jacdac.getRegister(keycap, reg::READING);
             }
         }
         queryPhase = (queryPhase + 1) & 3;

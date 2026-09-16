@@ -10,6 +10,47 @@ using namespace jacdac;
 
 The global `Jacdac` object is the default `Bus` instance.
 
+## Installation and target setup
+
+Install Sandeep Mistry's nRF5 Arduino core (validated with 0.8.0), select BBC micro:bit or BBC micro:bit V2, and select SoftDevice **None**:
+
+```powershell
+arduino-cli core update-index --additional-urls https://sandeepmistry.github.io/arduino-nRF5/package_nRF5_boards_index.json
+arduino-cli core install sandeepmistry:nRF5 --additional-urls https://sandeepmistry.github.io/arduino-nRF5/package_nRF5_boards_index.json
+```
+
+Install the named `Jacdac-X.Y.Z.zip` release asset using **Sketch > Include Library > Add .ZIP Library**, or install this checkout as an Arduino library. The named ZIP excludes build output, tests, and the source-checkout bench. GitHub's automatic source archives are not the minimal Arduino library package.
+
+The default data connection is micro:bit `P12` to `JD_DATA`, with common ground and an appropriately rated Jacdac power source on `JD_PWR`. Do not power actuator chains directly from the micro:bit 3 V pin. Verify adapter switch position and supply ratings before use.
+
+| Target | Resources owned by transport | Default device slots |
+| --- | --- | ---: |
+| V1 (`NRF51`, nRF51822) | P12, UART0, TIMER2 | 16 |
+| V2 (`NRF52833_XXAA`) | P12, UARTE1, TIMER3 | 32 |
+
+V1 has only one hardware UART. Do not reference `Serial` in a V1 Jacdac sketch: doing so conflicts with the transport's UART0 handler. The individual serial examples and hardware bench target V2. V1-safe examples are `MicrobitV1`, `PeripheralKitV1`, and `ProtocolFeaturesV1`.
+
+```powershell
+arduino-cli compile --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none --library . examples\Discover
+arduino-cli compile --fqbn sandeepmistry:nRF5:BBCmicrobit:softdevice=none --library . examples\MicrobitV1
+```
+
+### First sketch
+
+```cpp
+#include <Jacdac.h>
+
+void setup() {
+    jacdac::Jacdac.begin();
+}
+
+void loop() {
+    jacdac::Jacdac.process();
+}
+```
+
+Do not block `loop()` or callbacks for long periods. Use `millis()` deadlines for polling, and call `process()` between long serial output sections. A false queue result is backpressure or a validation error, not proof that the hardware is absent.
+
 ## Bus lifecycle
 
 ```cpp
@@ -164,7 +205,7 @@ if (packet.isRegisterGet() && packet.registerCode() == reg::READING && readValue
 }
 ```
 
-Register reports use the same `CMD_GET_REGISTER | register` command code as register requests. Events are reports whose command carries an event code and seven-bit sequence counter.
+Register reports use the same `CMD_GET_REGISTER | register` command code as register requests. Events are reports on regular services whose command carries an event code and seven-bit sequence counter. Reserved-service ACKs carry a CRC in that field and are not events or command-error reports.
 
 ## Commands and registers
 
@@ -349,9 +390,10 @@ explicit ButtonClient(Bus &bus, uint8_t instance = 0);
 bool requestPressure() const;
 bool requestPressed() const;
 bool requestAnalog() const;
+bool readPressed(const PacketView &packet, bool &pressed) const;
 ```
 
-Pressure is the standard `READING` register. Pressed and analog capability are `uint8_t` values. Button-down events carry no payload; button-up and hold events may carry a `uint32_t` duration in milliseconds.
+Pressure is the standard `READING` register (`uint16_t`, `u0.16`). `pressed` (`0x181`) is a client-only derived value, not a mandatory wire register. `requestPressed()` is retained as a compatibility helper but now requests pressure; handle the resulting `0x1101` report using `readPressed()` rather than expecting a one-byte `0x1181` reply. `readPressed()` updates the caller's boolean from matching pressure reports or down/up/hold events; initialize that boolean to false and clear it on disconnect. It returns false without modifying the value for unrelated or truncated packets. Analog capability is an optional `uint8_t` register. Button-down events carry no payload; button-up and hold events may carry a `uint32_t` duration in milliseconds.
 
 ### `RotaryEncoderClient`
 
@@ -374,6 +416,25 @@ bool requestVariant() const;
 ```
 
 Position is a `uint16_t` `u0.16` ratio. Variants are defined by `PotentiometerVariant`.
+
+### Light, magnetic field, acceleration, and distance clients
+
+These clients inherit `SensorClient`, including stable instance binding, `requestReading()`, streaming configuration, and `matchesReading()`.
+
+| Client constructor | Additional queries | Reading payload |
+| --- | --- | --- |
+| `LightLevelClient(Bus &, uint8_t instance = 0)` | `requestLightLevel()`, `requestVariant()` | `uint16_t` `u0.16` light-level ratio |
+| `MagneticFieldLevelClient(Bus &, uint8_t instance = 0)` | `requestStrength()`, `requestVariant()` | `int16_t` `i1.15` strength; divide by 32768 |
+| `AccelerometerClient(Bus &, uint8_t instance = 0)` | `requestForces()` | Three `int32_t` `i12.20` values in X/Y/Z order; divide each by 1048576 for g |
+| `DistanceClient(Bus &, uint8_t instance = 0)` | `requestDistance()`, `requestVariant()` | `uint32_t` `u16.16` metres; divide by 65536 |
+
+The queries return `bool` for queueing success and deliver reports through the bus packet handlers, like the other clients. Ultrasonic sensors use the `DISTANCE` service, not a separate service class; its optional variant register identifies ultrasonic as 1. Light level is a ratio, not a calibrated measurement in physical units. For accelerometer reports, `readValue(packet, forces)` accepts an `int32_t forces[3]` array and rejects truncated payloads.
+
+### Environmental clients
+
+`TemperatureClient(Bus &, uint8_t instance = 0)` provides `requestTemperature()` and `requestVariant()`. `HumidityClient(Bus &, uint8_t instance = 0)` provides `requestHumidity()`. Both inherit `SensorClient` and deliver register reports through the bus handlers.
+
+Temperature is a signed `int32_t` `i22.10` value; divide by 1024 for degrees Celsius. Humidity is an unsigned `uint32_t` `u22.10` value; divide by 1024 for relative humidity in percent, not a 0-1 ratio. An environmental module can expose both services under one device identifier. Use explicit service binding when pairing them on a bus with several environmental modules.
 
 ### `LedStripClient`
 
@@ -404,9 +465,13 @@ explicit LedClient(Bus &bus, uint8_t instance = 0);
 bool setBrightness(uint8_t brightness, bool requestAck = false) const;
 bool setPixels(const uint8_t *rgb, uint8_t byteCount,
                bool requestAck = false) const;
+bool requestPixels() const;
+bool requestNumPixels() const;
+bool requestVariant() const;
+bool requestActualBrightness() const;
 ```
 
-`setPixels()` sends packed RGB bytes to the `VALUE` register.
+`setPixels()` sends packed RGB bytes to the `VALUE` register. `requestPixels()` reads the same bytes; `requestNumPixels()` reads `uint16_t` register `0x182`, `requestVariant()` reads the optional shape byte, and `requestActualBrightness()` reads `uint8_t` register `0x180`. A physical ring or short strip may use this `LED` service rather than the separate `LED_STRIP` program service. Bind according to its announced service class, not the product's shape or name.
 
 ### `ServoClient`
 
@@ -415,9 +480,20 @@ explicit ServoClient(Bus &bus, uint8_t instance = 0);
 bool setAngle(float angleDegrees, bool requestAck = false) const;
 bool setAngleQ16(int32_t angleDegreesQ16, bool requestAck = false) const;
 bool setEnabled(bool enabled, bool requestAck = false) const;
+bool requestAngle() const;
+bool requestEnabled() const;
+bool requestMinAngle() const;
+bool requestMaxAngle() const;
+bool requestActualAngle() const;
 ```
 
 `setAngle()` accepts degrees directly. `setAngleQ16()` exposes the signed Q16.16 wire representation for code that already uses fixed-point values. `setEnabled()` writes actuator intensity 1 or 0.
+
+`requestAngle()` reads the commanded target (`VALUE`); it does not measure motor position. `requestEnabled()` reads a `uint8_t` boolean (`INTENSITY`). Minimum and maximum angles use `MIN_VALUE` (`0x110`) and `MAX_VALUE` (`0x111`). All angle replies are signed `int32_t` Q16.16 degrees. `requestActualAngle()` reads the optional `READING` register and may be unsupported on controllers without position feedback.
+
+Read the advertised limits before moving a motor; the client does not automatically query or clamp to them. Set the initial target while disabled, then enable power; disable power at the end. Multiple outputs on one controller are separate services: `ServoClient(bus, 0)` and `ServoClient(bus, 1)` select the first and second servo instances, or use `bind()` to select a specific device and service index.
+
+A continuous-rotation servo interprets the controller's pulse width as direction and speed rather than an absolute angle. Its neutral setting depends on the motor/calibration; the controller's angle register does not identify the attached motor type.
 
 ### Peripheral actuator clients
 
@@ -425,24 +501,49 @@ The following clients encode service-specific payload widths:
 
 | Client | Main operations and wire units |
 | --- | --- |
-| `RelayClient` | `setActive(bool)`, variant and maximum-current requests |
-| `LightBulbClient` | `setBrightness(uint16_t)` as `u0.16`, dimmable request |
-| `MotorClient` | `setSpeed(int16_t)` as `i1.15`, `setEnabled(bool)` |
-| `DualMotorsClient` | `setSpeeds(int16_t, int16_t)` as two `i1.15` values, `setEnabled(bool)` |
-| `BuzzerClient` | `setVolume(uint8_t)`, `playTone(periodUs, dutyUs, durationMs)`, `playNote(frequency, volume, durationMs)` |
+| `RelayClient` | `setActive(bool)`, `requestActive()` (one-byte state), variant and maximum-current requests |
 | `VibrationMotorClient` | `vibrate(const VibrationStep *, uint8_t)`, `stop()`, maximum-sequence request |
 
 `VibrationStep::duration8Milliseconds` is measured in 8 ms units; `intensity` is `u0.8`.
 
-### HID clients
+For haptic output, use `VibrationMotorClient`. `vibrate(steps, count, requestAck)` sends a finite sequence of duration/intensity pairs; `stop(requestAck)` sends the specified empty sequence to cancel vibration. A step `{25, 128}` requests 200 ms at roughly half intensity. `requestMaxVibrations()` reads the optional one-byte maximum sequence length at `0x180`; some devices reject that register but still support vibration and stop commands. ACKs confirm command receipt, not measured motor motion, and retransmission can restart a pulse.
 
-`HidKeyboardClient` provides `key(selector, modifiers, action)` and `clear()`. `HidMouseClient` provides `setButton(buttons, event)`, `move(deltaX, deltaY, timeMilliseconds)`, and `wheel(deltaY, timeMilliseconds)`. `HidJoystickClient` provides repeated-byte button pressures, repeated `i1.15` axes, and capability-register requests. HID selector, modifier, action, button, and event values follow the Jacdac service specifications.
+### PowerClient
 
-### Display and power clients
+```cpp
+explicit PowerClient(Bus &bus, uint8_t instance = 0);
+bool setAllowed(bool allowed, bool requestAck = false) const;
+bool setMaxPower(uint16_t milliamps, bool requestAck = false) const;
+bool setKeepOnPulse(uint16_t durationMilliseconds, uint16_t periodMilliseconds,
+                    bool requestAck = false) const;
+bool requestAllowed() const;
+bool requestMaxPower() const;
+bool requestCurrentDraw() const;
+bool requestBatteryVoltage() const;
+bool requestPowerStatus() const;
+bool requestBatteryCharge() const;
+bool requestBatteryCapacity() const;
+bool requestKeepOnPulseDuration() const;
+bool requestKeepOnPulsePeriod() const;
+```
 
-`CharacterScreenClient` writes counted message bytes and `u0.16` brightness and requests rows, columns, and variant. `CursorCharacterScreenClient` provides enable, home, clear, cursor-position, counted-message, row, and column operations.
+| Register | Code | Payload | Access |
+| --- | --- | --- | --- |
+| Allowed | `0x001` | `uint8_t` bool | Read/write |
+| Maximum current (`max_power`) | `0x007` | `uint16_t` mA | Optional; may be read-only |
+| Current draw | `0x101` | `uint16_t` mA | Optional read |
+| Input/battery voltage | `0x180` | `uint16_t` mV | Optional read |
+| Power status | `0x181` | `uint8_t` `PowerStatus` | Read and change event |
+| Battery charge | `0x182` | `uint16_t` `u0.16` ratio | Optional read |
+| Battery capacity | `0x183` | `uint32_t` mWh | Optional read |
+| Keep-on pulse duration | `0x080` | `uint16_t` ms | Optional read/write |
+| Keep-on pulse period | `0x081` | `uint16_t` ms | Optional read/write |
 
-`PowerClient` controls the one-byte `allowed` register and `uint16_t` maximum power in mA. It can request current draw, battery voltage, power status, battery charge, and battery capacity. Power-provider shutdown negotiation is intentionally not exposed as a normal directed client command.
+`PowerStatus` defines `Disallowed=0`, `Powering=1`, `Overload=2`, and `Overprovision=3`. `event::VALUE_CHANGED` on a power service carries the new status byte. `allowed=1` permits power delivery but does not guarantee it; inspect status. Disabling a channel can cut power to peripherals but normally does not remove the provider's own announced identity.
+
+`setKeepOnPulse()` rejects a zero period or duty cycle above 10%. It queues one ordered batch: duration zero, new period, then new duration. This avoids intentionally applying a new duration against an old period, but the remote device may not support the registers or frame batching. Always read the values back. Keep-alive pulses deliberately draw current; use only when the supply requires them. Current-limit writes cannot increase the hardware rating and may be ignored or clamped. Power-provider shutdown negotiation is automatic and is not exposed as a normal directed helper.
+
+**Verified read-only on 2026-09-16:** both `D5DEDD2A07564AAB` and `565585F86091A379` report allowed 1, status `Powering`, and limit 900 mA. Both explicitly reject current draw, input voltage, battery charge/capacity, and keep-on duration/period. Their ability to change the current limit was not tested. No power settings were changed. Generic Control-service metadata can be queried separately and is firmware-dependent. A multi-port supply may announce separate device identities for each channel, even if only one port is connected.
 
 ## Value conversion
 
@@ -493,13 +594,32 @@ Counters reset on `begin()`.
 | `receiveBytes` | Total bytes finalized by the receiver |
 | `receiveTimeouts`, `receiveShortFrames` | Timed-out or truncated receives |
 | `receiveInvalidFrames` | Complete-looking frames rejected by validation |
-| `receiveHardwareErrors` | UART/UARTE hardware error events |
+| `receiveHardwareErrors` | UART/UARTE hardware-error terminations of invalid frames; valid end-of-frame breaks are excluded |
 
 Transport counters are synchronized into `Diagnostics` by `process()`.
 
 ## Service, register, command, and event constants
 
-Service classes are defined under `jacdac::service`. `JacdacServices.h` includes all 113 service identifiers in the upstream Jacdac catalog at the time of this release, using uppercase underscore names such as `HID_KEYBOARD`, `CHARACTER_SCREEN`, `POWER`, and `DC_CURRENT_MEASUREMENT`. These constants consume no target RAM or linked flash when unused.
+Service classes are defined under `jacdac::service` in `JacdacServices.h`. The public named service set is restricted to the following hardware-verified types plus Control. Generic packet and discovery APIs remain protocol-level building blocks, not claims of additional device support.
+
+| Service constant | Identifier |
+| --- | --- |
+| `CONTROL` | `0x00000000` |
+| `ACCELEROMETER` | `0x1f140409` |
+| `BUTTON` | `0x1473a263` |
+| `DISTANCE` | `0x141a6b8a` |
+| `HUMIDITY` | `0x16c810b8` |
+| `LED` | `0x1609d4f0` |
+| `LED_STRIP` | `0x126f00e0` |
+| `LIGHT_LEVEL` | `0x17dc9a1c` |
+| `MAGNETIC_FIELD_LEVEL` | `0x12fe180f` |
+| `POTENTIOMETER` | `0x1f274746` |
+| `POWER` | `0x1fa4c95a` |
+| `RELAY` | `0x183fe656` |
+| `ROTARY_ENCODER` | `0x10fa29c9` |
+| `SERVO` | `0x12fc9103` |
+| `TEMPERATURE` | `0x1421bac7` |
+| `VIBRATION_MOTOR` | `0x183fc4a2` |
 
 Core protocol constants:
 
@@ -526,6 +646,7 @@ Public variants:
 | `LedStripLightType` | `Ws2812bGrb = 0x00`, `Apa102 = 0x10`, `Sk9822 = 0x11` |
 | `LedStripVariant` | `Strip = 0x01`, `Ring = 0x02`, `Stick = 0x03`, `Jewel = 0x04`, `Matrix = 0x05` |
 | `PotentiometerVariant` | `Slider = 0x01`, `Rotary = 0x02`, `Hall = 0x03` |
+| `PowerStatus` | `Disallowed = 0`, `Powering = 1`, `Overload = 2`, `Overprovision = 3` |
 
 Register constants are under `jacdac::reg`; service command constants are under `jacdac::command`. Use `JacdacServices.h` for the included register and command values and the generated Jacdac specification headers as the authority for complete service-specific payload layouts.
 
@@ -548,11 +669,11 @@ bool packetAt(const Frame &frame, size_t &offset, PacketView &packet);
 
 ## Compile-time configuration
 
-Define overrides before including `Jacdac.h`.
+Apply overrides consistently to all library and sketch translation units, for example with project-wide compiler flags. A definition in only the sketch does not configure the separately compiled library files.
 
 | Macro | Default | Valid range |
 | --- | ---: | --- |
-| `JACDAC_MAX_DEVICES` | 8 | 1-254 |
+| `JACDAC_MAX_DEVICES` | 32 (V2), 16 (V1), 8 (other/host) | 1-254 |
 | `JACDAC_MAX_SERVICES_PER_DEVICE` | 16 | 1-58 |
 | `JACDAC_RX_QUEUE_SIZE` | 4 | 1-254 |
 | `JACDAC_TX_QUEUE_SIZE` | 4 | 1-254 |
@@ -561,4 +682,36 @@ Define overrides before including `Jacdac.h`.
 | `JACDAC_MAX_SUBSCRIBERS` | 6 | 1-254 |
 | `JACDAC_FRAME_DATA_SIZE` | 240 | Multiple of 4 from 8 through 240 |
 
-The default maximum frame data is 240 bytes, of which 236 bytes are available as serial payload after frame overhead. Increasing capacities increases static RAM use.
+The device-capacity defaults are selected by `NRF52833_XXAA` (V2) and `NRF51` (V1); an explicit `JACDAC_MAX_DEVICES` definition takes precedence. Power-provider device identities occupy slots just like peripherals. Queue and request capacities are independent of the device-table size.
+
+The default maximum frame data is 240 bytes, of which 236 bytes are available as serial payload after frame overhead. Increasing capacities increases static RAM use. With the default 16 services per device, each device-table slot uses 88 bytes on the micro:bit targets.
+
+## Implementation
+
+The library is a fixed-memory controller/client, not a Jacdac peripheral/server. `JacdacProtocol` owns wire layout, CRC and packet iteration; `JacdacTransport` owns the nRF GPIO/UART/timer state machine; `Jacdac` owns queues, discovery, ACKs and subscriptions; `JacdacClients` supplies service-specific helpers; `JacdacServices` and `JacdacConfig` supply constants and capacity settings.
+
+### Interrupts and ownership
+
+Transport interrupts do bounded hardware work and invoke private bus callbacks. Received validated frames are copied into the RX ring; transmit completion advances the TX ring. User callbacks execute only when `Bus::process()` drains frames. The transport is a singleton, with one active owning `Bus`; a second bus cannot stop the owner. Queue indices are volatile and frame copies use short interrupt-disabled sections. Application code should not operate transport registers directly.
+
+On V2, the 250 us receive-header check reads the frame-size byte written by EasyDMA, not the in-progress `RXD.AMOUNT` register. Completion waits for receive stop before validating length and CRC. Jacdac's trailing break raises UART framing/break events, so a valid frame terminated by that delimiter is not counted as a hardware fault.
+
+The Arduino GPIOTE channel is detached while transmitting so GPIO can drive the start/end pulses, then restored for receive. Short waits use the transport timer where needed; UARTE shutdown waits boundedly for `TXSTOPPED`. These are hardware-sensitive behaviors: target builds and live interoperability checks are required for changes. The software handles packet loss; it is not a full waveform-conformance certification.
+
+### Memory and lifetime
+
+The library allocates no heap memory. Device records, frame queues, ACK requests, register requests, and subscriptions are fixed-capacity arrays. Frame rings contain one extra slot to distinguish full from empty. A capacity failure is explicit via `lastError()` or diagnostics; there is no allocation fallback. `Device` references address mutable bus table slots; `PacketView::data` addresses the current RX frame. Copy values that must survive a callback or later `process()` call.
+
+The optional V2 bench has additional fixed probe/output storage independent of `Bus`. It holds up to `min(4 * MAX_DEVICES, 254)` register probes, reports probe overflow, and does not imply that every possible service on 32 devices can be probed at once. Power-channel probes have different byte widths; absent optional registers are marked unsupported, not reported as a measured zero. Disconnected probe histories are labeled separately from the live device table.
+
+### Delivery and failure contracts
+
+Queue success is not remote execution. ACKs identify a frame by device and CRC; the CRC in an ACK is not a service command or event. Retries can repeat non-idempotent operations such as a vibration pulse. Register responses have no request token, so only one identical request may be pending. Timeouts pass `nullptr`; device-side rejections are separately delivered to the command-error handler. Unsupported-register replies do not cancel the pending generic read immediately; callers must tolerate its subsequent timeout callback.
+
+V1 uses a per-byte UART interrupt and remains more timing-sensitive than V2. Its physical interoperability remains unverified. All retained peripheral service types have V2 hardware evidence described in README and host-fixture coverage; optional registers and configuration operations remain hardware-dependent. The library does not certify every product variant implementing those types.
+
+### Tests and releases
+
+Host checks use C++11 with `-DJACDAC_TEST -Itests -Isrc -Wall -Wextra -Wpedantic`, linking `JacdacProtocol.cpp`, `Jacdac.cpp`, `JacdacClients.cpp`, `mock_arduino.cpp`, and `mock_transport.cpp` against each test main. `test_protocol` checks wire parsing; `test_bus` checks clients, queues, ACKs and capacity; `test_hardware_validation` includes the real bench with a serial stub and checks decoding, output ordering, retries, limits, and shutdown. CI compiles representative V1/V2 examples and the V2 bench. The release workflow builds all individual examples for V2 and the three V1-safe examples for V1.
+
+To publish a release, update `library.properties`, commit and push, then create a matching stable `vX.Y.Z` tag and push that tag. The release workflow checks that the tag matches the library version and creates the minimal library ZIP. An ordinary commit/push does not create a release tag.

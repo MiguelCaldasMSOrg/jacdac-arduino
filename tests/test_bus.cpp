@@ -420,10 +420,16 @@ static void testDiagnosticCategories() {
         finalizeFrame(deviceAnnouncement);
         inject(bus, deviceAnnouncement);
     }
+    assert(bus.deviceCount() == MAX_DEVICES);
+    const Device *lastDevice = bus.device(static_cast<uint8_t>(MAX_DEVICES - 1));
+    assert(lastDevice != nullptr);
+    assert(lastDevice->deviceIdentifier == DEVICE_ID + MAX_DEVICES - 1);
     Frame excessDevice = announce(1, 1);
     excessDevice.deviceIdentifier += MAX_DEVICES;
     finalizeFrame(excessDevice);
     inject(bus, excessDevice);
+    assert(bus.deviceCount() == MAX_DEVICES);
+    assert(bus.device(MAX_DEVICES) == nullptr);
     assert(bus.diagnostics().deviceOverflows == 1);
     assert(bus.diagnostics().receiveOverflows == 0);
     bus.end();
@@ -434,7 +440,7 @@ static void testPeripheralClientPayloads() {
     assert(bus.begin());
     finishPendingTransmission(bus);
     Frame frame;
-    const uint32_t serviceClasses[] = {service::RELAY, service::LIGHT_BULB, service::MOTOR, service::DUAL_MOTORS, service::BUZZER, service::VIBRATION_MOTOR, service::HID_KEYBOARD, service::HID_MOUSE, service::HID_JOYSTICK, service::CHARACTER_SCREEN, service::CURSOR_CHARACTER_SCREEN, service::POWER};
+    const uint32_t serviceClasses[] = {service::RELAY, service::VIBRATION_MOTOR, service::POWER};
     inject(bus, announceServices(serviceClasses, sizeof(serviceClasses) / sizeof(serviceClasses[0])));
 
     RelayClient relay(bus);
@@ -444,88 +450,283 @@ static void testPeripheralClientPayloads() {
     const uint8_t relayData[] = {1};
     assertPayload(packet, CMD_SET_REGISTER | reg::INTENSITY, relayData, sizeof(relayData));
 
-        LightBulbClient bulb(bus);
-        assert(bulb.bind({DEVICE_ID, service::LIGHT_BULB, 2}));
-        assert(bulb.setBrightness(0x1234));
-        packet = takePacket(bus, frame);
-        const uint8_t bulbData[] = {0x34, 0x12};
-        assertPayload(packet, CMD_SET_REGISTER | reg::INTENSITY, bulbData, sizeof(bulbData));
+    VibrationMotorClient vibration(bus);
+    assert(vibration.bind({DEVICE_ID, service::VIBRATION_MOTOR, 2}));
+    const VibrationStep steps[] = {{2, 255}, {3, 0}};
+    assert(vibration.vibrate(steps, 2));
+    packet = takePacket(bus, frame);
+    const uint8_t vibrationData[] = {2, 255, 3, 0};
+    assertPayload(packet, command::VIBRATION_MOTOR_VIBRATE, vibrationData, sizeof(vibrationData));
 
-        MotorClient motor(bus);
-        assert(motor.bind({DEVICE_ID, service::MOTOR, 3}));
-        assert(motor.setSpeed(-2));
-        packet = takePacket(bus, frame);
-        const uint8_t motorData[] = {0xfe, 0xff};
-        assertPayload(packet, CMD_SET_REGISTER | reg::VALUE, motorData, sizeof(motorData));
-
-        DualMotorsClient motors(bus);
-        assert(motors.bind({DEVICE_ID, service::DUAL_MOTORS, 4}));
-        assert(motors.setSpeeds(0x1234, -2));
-        packet = takePacket(bus, frame);
-        const uint8_t motorsData[] = {0x34, 0x12, 0xfe, 0xff};
-        assertPayload(packet, CMD_SET_REGISTER | reg::VALUE, motorsData, sizeof(motorsData));
-
-        BuzzerClient buzzer(bus);
-        assert(buzzer.bind({DEVICE_ID, service::BUZZER, 5}));
-        assert(buzzer.playNote(440, 0x8000, 250));
-        packet = takePacket(bus, frame);
-        const uint8_t buzzerData[] = {0xb8, 0x01, 0x00, 0x80, 0xfa, 0x00};
-        assertPayload(packet, command::BUZZER_PLAY_NOTE, buzzerData, sizeof(buzzerData));
-
-        VibrationMotorClient vibration(bus);
-        assert(vibration.bind({DEVICE_ID, service::VIBRATION_MOTOR, 6}));
-        const VibrationStep steps[] = {{2, 255}, {3, 0}};
-        assert(vibration.vibrate(steps, 2));
-        packet = takePacket(bus, frame);
-        const uint8_t vibrationData[] = {2, 255, 3, 0};
-        assertPayload(packet, command::VIBRATION_MOTOR_VIBRATE, vibrationData, sizeof(vibrationData));
-
-        HidKeyboardClient keyboard(bus);
-        assert(keyboard.bind({DEVICE_ID, service::HID_KEYBOARD, 7}));
-        assert(keyboard.key(0x1234, 0x05, 2));
-        packet = takePacket(bus, frame);
-        const uint8_t keyboardData[] = {0x34, 0x12, 0x05, 0x02};
-        assertPayload(packet, command::HID_KEYBOARD_KEY, keyboardData, sizeof(keyboardData));
-
-        HidMouseClient mouse(bus);
-        assert(mouse.bind({DEVICE_ID, service::HID_MOUSE, 8}));
-        assert(mouse.move(-2, 0x1234, 0x5678));
-        packet = takePacket(bus, frame);
-        const uint8_t mouseData[] = {0xfe, 0xff, 0x34, 0x12, 0x78, 0x56};
-        assertPayload(packet, command::HID_MOUSE_MOVE, mouseData, sizeof(mouseData));
-
-        HidJoystickClient joystick(bus);
-        assert(joystick.bind({DEVICE_ID, service::HID_JOYSTICK, 9}));
-        const int16_t axes[] = {-2, 0x1234};
-        assert(joystick.setAxes(axes, 2));
-        packet = takePacket(bus, frame);
-        const uint8_t joystickData[] = {0xfe, 0xff, 0x34, 0x12};
-        assertPayload(packet, command::HID_JOYSTICK_SET_AXIS, joystickData, sizeof(joystickData));
-
-        CharacterScreenClient screen(bus);
-        assert(screen.bind({DEVICE_ID, service::CHARACTER_SCREEN, 10}));
-        assert(screen.setMessage("abc", 3));
-        packet = takePacket(bus, frame);
-        const uint8_t messageData[] = {'a', 'b', 'c'};
-        assertPayload(packet, CMD_SET_REGISTER | reg::VALUE, messageData, sizeof(messageData));
-
-        CursorCharacterScreenClient cursorScreen(bus);
-        assert(cursorScreen.bind({DEVICE_ID, service::CURSOR_CHARACTER_SCREEN, 11}));
-        assert(cursorScreen.setCursor(12, 3));
-        packet = takePacket(bus, frame);
-        const uint8_t cursorData[] = {12, 3};
-        assertPayload(packet, command::CURSOR_SCREEN_SET_CURSOR, cursorData, sizeof(cursorData));
-
-        PowerClient power(bus);
-        assert(power.bind({DEVICE_ID, service::POWER, 12}));
-        assert(power.setMaxPower(900));
-        packet = takePacket(bus, frame);
-        const uint8_t powerData[] = {0x84, 0x03};
-        assertPayload(packet, CMD_SET_REGISTER | reg::MAX_POWER, powerData, sizeof(powerData));
+    PowerClient power(bus);
+    assert(power.bind({DEVICE_ID, service::POWER, 3}));
+    assert(power.setMaxPower(900));
+    packet = takePacket(bus, frame);
+    const uint8_t powerData[] = {0x84, 0x03};
+    assertPayload(packet, CMD_SET_REGISTER | reg::MAX_POWER, powerData, sizeof(powerData));
 
     VibrationStep tooMany[1];
     assert(!vibration.vibrate(tooMany, static_cast<uint8_t>(SERIAL_PAYLOAD_SIZE / sizeof(VibrationStep) + 1)));
     assert(bus.lastError() == Error::PacketTooLarge);
+    bus.end();
+}
+
+static void testAdditionalDeviceClients() {
+    Bus bus;
+    jacdacTestSetMillis(0);
+    assert(bus.begin());
+    finishPendingTransmission(bus);
+    const uint32_t serviceClasses[] = {service::RELAY, service::LIGHT_LEVEL, service::LED_STRIP, service::ACCELEROMETER, service::DISTANCE, service::BUTTON};
+    inject(bus, announceServices(serviceClasses, sizeof(serviceClasses) / sizeof(serviceClasses[0])));
+
+    RelayClient relay(bus);
+    LightLevelClient light(bus);
+    LedStripClient strip(bus);
+    AccelerometerClient accelerometer(bus);
+    DistanceClient distance(bus);
+    ButtonClient button(bus);
+    ServiceClient *clients[] = {&relay, &light, &strip, &accelerometer, &distance, &button};
+    for (uint8_t index = 0; index < sizeof(clients) / sizeof(clients[0]); ++index) {
+        assert(clients[index]->connected());
+        const Service target = clients[index]->resolve();
+        assert(target.deviceIdentifier == DEVICE_ID);
+        assert(target.serviceIndex == index + 1);
+        assert(target.serviceClass == serviceClasses[index]);
+    }
+
+    Frame frame;
+    const auto expectRegister = [&bus, &frame](uint8_t serviceIndex, uint16_t registerCode) {
+        const PacketView packet = takePacket(bus, frame);
+        assert(packet.isCommand());
+        assert(packet.deviceIdentifier == DEVICE_ID);
+        assert(packet.serviceIndex == serviceIndex);
+        assert(packet.serviceCommand == (CMD_GET_REGISTER | registerCode));
+        assert(packet.dataSize == 0);
+    };
+    assert(relay.requestActive());
+    expectRegister(1, reg::INTENSITY);
+    assert(light.requestLightLevel());
+    expectRegister(2, reg::READING);
+    assert(light.requestVariant());
+    expectRegister(2, reg::VARIANT);
+    assert(strip.requestNumPixels());
+    expectRegister(3, reg::LED_STRIP_NUM_PIXELS);
+    assert(accelerometer.requestForces());
+    expectRegister(4, reg::READING);
+    assert(distance.requestDistance());
+    expectRegister(5, reg::READING);
+    assert(distance.requestVariant());
+    expectRegister(5, reg::VARIANT);
+    assert(button.requestPressure());
+    expectRegister(6, reg::READING);
+
+    const PacketView reading = {DEVICE_ID, nullptr, CMD_GET_REGISTER | reg::READING, 4, 0, 0};
+    assert(accelerometer.matchesReading(reading));
+    assert(!distance.matchesReading(reading));
+    bus.end();
+}
+
+static void testServoClientPayloads() {
+    Bus bus;
+    jacdacTestSetMillis(0);
+    assert(bus.begin());
+    finishPendingTransmission(bus);
+    ServoClient servo(bus);
+    assert(!servo.connected());
+    assert(!servo.requestAngle());
+    assert(bus.lastError() == Error::InvalidService);
+    const uint32_t serviceClasses[] = {service::BUTTON, service::SERVO};
+    inject(bus, announceServices(serviceClasses, 2));
+    assert(servo.connected());
+    assert(servo.resolve().deviceIdentifier == DEVICE_ID);
+    assert(servo.resolve().serviceIndex == 2);
+    assert(!servo.bind(bus.service(DEVICE_ID, 1)));
+    assert(bus.lastError() == Error::InvalidService);
+
+    Frame frame;
+    const auto expectRegister = [&bus, &frame](uint16_t command) {
+        const PacketView packet = takePacket(bus, frame);
+        assert(packet.isCommand() && packet.deviceIdentifier == DEVICE_ID && packet.serviceIndex == 2);
+        assert(packet.serviceCommand == command && packet.dataSize == 0);
+    };
+    assert(servo.requestAngle());
+    expectRegister(0x1002);
+    assert(servo.requestEnabled());
+    expectRegister(0x1001);
+    assert(servo.requestMinAngle());
+    expectRegister(0x1110);
+    assert(servo.requestMaxAngle());
+    expectRegister(0x1111);
+    assert(servo.requestActualAngle());
+    expectRegister(0x1101);
+
+    assert(servo.setAngle(90.5f));
+    PacketView packet = takePacket(bus, frame);
+    const uint8_t fractionalAngle[] = {0x00, 0x80, 0x5a, 0x00};
+    assertPayload(packet, 0x2002, fractionalAngle, sizeof(fractionalAngle));
+    assert(packet.deviceIdentifier == DEVICE_ID && packet.serviceIndex == 2);
+    assert(servo.setAngleQ16(-32768));
+    packet = takePacket(bus, frame);
+    const uint8_t negativeAngle[] = {0x00, 0x80, 0xff, 0xff};
+    assertPayload(packet, 0x2002, negativeAngle, sizeof(negativeAngle));
+    assert(servo.setEnabled(true));
+    packet = takePacket(bus, frame);
+    const uint8_t enabled[] = {1};
+    assertPayload(packet, 0x2001, enabled, sizeof(enabled));
+    assert(servo.setEnabled(false, true));
+    packet = takePacket(bus, frame);
+    const uint8_t disabled[] = {0};
+    assertPayload(packet, 0x2001, disabled, sizeof(disabled));
+    assert((packet.flags & FRAME_FLAG_ACK_REQUESTED) != 0);
+    bus.end();
+}
+
+static void testEnvironmentAndHapticClients() {
+    Bus bus;
+    jacdacTestSetMillis(0);
+    assert(bus.begin());
+    finishPendingTransmission(bus);
+    const uint32_t serviceClasses[] = {service::TEMPERATURE, service::HUMIDITY, service::VIBRATION_MOTOR};
+    inject(bus, announceServices(serviceClasses, 3));
+    TemperatureClient temperature(bus);
+    HumidityClient humidity(bus);
+    VibrationMotorClient haptic(bus);
+    assert(temperature.connected() && humidity.connected() && haptic.connected());
+    assert(temperature.resolve().deviceIdentifier == humidity.resolve().deviceIdentifier);
+    assert(temperature.resolve().serviceIndex == 1 && humidity.resolve().serviceIndex == 2);
+    assert(haptic.resolve().serviceIndex == 3);
+    Frame frame;
+    const auto expectRegister = [&bus, &frame](uint8_t serviceIndex, uint16_t command) {
+        const PacketView packet = takePacket(bus, frame);
+        assert(packet.isCommand() && packet.deviceIdentifier == DEVICE_ID);
+        assert(packet.serviceIndex == serviceIndex && packet.serviceCommand == command && packet.dataSize == 0);
+    };
+    assert(temperature.requestTemperature());
+    expectRegister(1, 0x1101);
+    assert(temperature.requestVariant());
+    expectRegister(1, 0x1107);
+    assert(humidity.requestHumidity());
+    expectRegister(2, 0x1101);
+    assert(haptic.requestMaxVibrations());
+    expectRegister(3, 0x1180);
+    const VibrationStep pulse[] = {{25, 128}, {25, 0}};
+    assert(haptic.vibrate(pulse, 2));
+    PacketView packet = takePacket(bus, frame);
+    const uint8_t expected[] = {25, 128, 25, 0};
+    assert(packet.deviceIdentifier == DEVICE_ID && packet.serviceIndex == 3);
+    assertPayload(packet, 0x80, expected, sizeof(expected));
+    assert(!haptic.vibrate(nullptr, 1));
+    assert(bus.lastError() == Error::InvalidArgument);
+    assert(haptic.stop(true));
+    packet = takePacket(bus, frame);
+    assert(packet.isCommand() && packet.serviceIndex == 3 && packet.serviceCommand == 0x80 && packet.dataSize == 0);
+    assert((packet.flags & FRAME_FLAG_ACK_REQUESTED) != 0);
+    bus.end();
+}
+
+static void testPowerClientCapabilities() {
+    Bus bus;
+    jacdacTestSetMillis(0);
+    assert(bus.begin());
+    finishPendingTransmission(bus);
+    const uint32_t classes[] = {service::POWER, service::POWER};
+    inject(bus, announceServices(classes, 2));
+    PowerClient first(bus);
+    PowerClient second(bus, 1);
+    assert(first.resolve().serviceIndex == 1 && second.resolve().serviceIndex == 2);
+    Frame frame;
+    const auto expectRead = [&bus, &frame](uint16_t command) {
+        const PacketView packet = takePacket(bus, frame);
+        assert(packet.isCommand() && packet.deviceIdentifier == DEVICE_ID && packet.serviceIndex == 2);
+        assert(packet.serviceCommand == command && packet.dataSize == 0);
+    };
+    assert(second.requestAllowed()); expectRead(0x1001);
+    assert(second.requestMaxPower()); expectRead(0x1007);
+    assert(second.requestCurrentDraw()); expectRead(0x1101);
+    assert(second.requestBatteryVoltage()); expectRead(0x1180);
+    assert(second.requestPowerStatus()); expectRead(0x1181);
+    assert(second.requestBatteryCharge()); expectRead(0x1182);
+    assert(second.requestBatteryCapacity()); expectRead(0x1183);
+    assert(second.requestKeepOnPulseDuration()); expectRead(0x1080);
+    assert(second.requestKeepOnPulsePeriod()); expectRead(0x1081);
+    assert(!second.setKeepOnPulse(1, 0));
+    assert(bus.lastError() == Error::InvalidArgument);
+    assert(!second.setKeepOnPulse(101, 1000));
+    assert(bus.lastError() == Error::InvalidArgument);
+    assert(!NrfTransport::instance().takeSentFrame(frame));
+    assert(second.setKeepOnPulse(100, 1000, true));
+    assert(NrfTransport::instance().takeSentFrame(frame));
+    assert((frame.flags & FRAME_FLAG_ACK_REQUESTED) != 0);
+    const uint16_t commands[] = {0x2080, 0x2081, 0x2080};
+    const uint16_t values[] = {0, 1000, 100};
+    size_t offset = 0;
+    PacketView packet;
+    for (uint8_t index = 0; index < 3; ++index) {
+        assert(packetAt(frame, offset, packet));
+        assert(packet.serviceIndex == 2 && packet.serviceCommand == commands[index] && packet.dataSize == 2);
+        uint16_t value = 0;
+        assert(readValue(packet, value) && value == values[index]);
+    }
+    assert(!packetAt(frame, offset, packet));
+    bus.end();
+}
+
+static void testAckCrcIsNotAnEventOrError() {
+    Bus bus;
+    jacdacTestSetMillis(0);
+    assert(bus.begin());
+    finishPendingTransmission(bus);
+    inject(bus, announce(1, 1));
+    int eventCount = 0;
+    bus.addPacketHandler([](const PacketView &packet, void *context) {
+        if (packet.isEvent()) ++*static_cast<int *>(context);
+    }, &eventCount);
+    inject(bus, frameWithPacket(DEVICE_ID, 0, 1, 0x8101));
+    inject(bus, frameWithPacket(DEVICE_ID, 0, SERVICE_INDEX_CRC_ACK, 0xf081));
+    inject(bus, frameWithPacket(DEVICE_ID, 0, SERVICE_INDEX_CRC_ACK, CMD_COMMAND_NOT_IMPLEMENTED));
+    inject(bus, frameWithPacket(DEVICE_ID, 0, 1, 0x8202));
+    assert(eventCount == 2);
+    assert(bus.diagnostics().outOfOrderEvents == 0);
+    assert(bus.diagnostics().malformedPackets == 0 && bus.diagnostics().commandErrors == 0);
+    bus.end();
+}
+
+static void testTestedDeviceHelpers() {
+    Bus bus;
+    jacdacTestSetMillis(0);
+    assert(bus.begin());
+    finishPendingTransmission(bus);
+    const uint32_t classes[] = {service::BUTTON, service::MAGNETIC_FIELD_LEVEL, service::LED};
+    inject(bus, announceServices(classes, 3));
+    ButtonClient button(bus);
+    MagneticFieldLevelClient magnet(bus);
+    LedClient led(bus);
+    Frame frame;
+    assert(button.requestPressed());
+    PacketView packet = takePacket(bus, frame);
+    assert(packet.serviceCommand == 0x1101 && packet.serviceIndex == 1);
+    bool pressed = false;
+    const uint8_t pressure[] = {1, 0};
+    packet = {DEVICE_ID, pressure, 0x1101, 1, 2, 0};
+    assert(button.readPressed(packet, pressed) && pressed);
+    packet.dataSize = 1;
+    assert(!button.readPressed(packet, pressed) && pressed);
+    packet = {DEVICE_ID, nullptr, 0x8002, 1, 0, 0};
+    assert(button.readPressed(packet, pressed) && !pressed);
+    packet.serviceCommand = 0x8181;
+    assert(button.readPressed(packet, pressed) && pressed);
+    packet.serviceIndex = 2;
+    assert(!button.readPressed(packet, pressed));
+    assert(magnet.requestStrength());
+    packet = takePacket(bus, frame);
+    assert(packet.serviceIndex == 2 && packet.serviceCommand == 0x1101);
+    assert(magnet.requestVariant());
+    packet = takePacket(bus, frame);
+    assert(packet.serviceCommand == 0x1107);
+    assert(led.requestPixels()); packet = takePacket(bus, frame); assert(packet.serviceIndex == 3 && packet.serviceCommand == 0x1002);
+    assert(led.requestNumPixels()); packet = takePacket(bus, frame); assert(packet.serviceCommand == 0x1182);
+    assert(led.requestVariant()); packet = takePacket(bus, frame); assert(packet.serviceCommand == 0x1107);
+    assert(led.requestActualBrightness()); packet = takePacket(bus, frame); assert(packet.serviceCommand == 0x1180);
     bus.end();
 }
 
@@ -540,5 +741,11 @@ int main() {
     testExclusiveBusOwnership();
     testTypedClientBindingIsStable();
     testDiagnosticCategories();
+    testAdditionalDeviceClients();
+    testServoClientPayloads();
+    testEnvironmentAndHapticClients();
+    testPowerClientCapabilities();
+    testAckCrcIsNotAnEventOrError();
+    testTestedDeviceHelpers();
     return 0;
 }

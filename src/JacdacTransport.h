@@ -69,6 +69,7 @@ private:
     Frame receiveFrame_;
     Frame transmitFrame_;
     volatile bool transmitPending_;
+    volatile bool receiveHadHardwareError_;
 #if defined(NRF52833_XXAA)
     volatile bool receiveTimedOut_;
 #endif

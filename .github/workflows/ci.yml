@@ -48,6 +48,8 @@ jobs:
           build/tests/test_protocol
           g++ -std=c++11 -DJACDAC_TEST -Itests -Isrc -Wall -Wextra -Wpedantic "${sources[@]}" tests/test_bus.cpp -o build/tests/test_bus
           build/tests/test_bus
+          g++ -std=c++11 -DJACDAC_TEST -Itests -Isrc -Wall -Wextra -Wpedantic "${sources[@]}" tests/test_hardware_validation.cpp -o build/tests/test_hardware_validation
+          build/tests/test_hardware_validation
 
       - name: Set up Arduino CLI
         shell: bash
@@ -78,3 +80,4 @@ jobs:
           arduino-cli core install sandeepmistry:nRF5 --additional-urls "$NRF5_BOARD_MANAGER_URL"
           arduino-cli compile --clean --library "$GITHUB_WORKSPACE" --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none examples/ProtocolFeatures
           arduino-cli compile --clean --library "$GITHUB_WORKSPACE" --fqbn sandeepmistry:nRF5:BBCmicrobit:softdevice=none examples/ProtocolFeaturesV1
+          arduino-cli compile --clean --library "$GITHUB_WORKSPACE" --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none extras/HardwareValidation

@@ -17,8 +17,9 @@ static void packetReceived(const PacketView &packet, void *) {
         } else if (packet.eventCode() == event::BUTTON_HOLD) {
             Serial.println("button hold");
         }
-    } else if (packet.isRegisterGet() && packet.registerCode() == reg::BUTTON_PRESSED && packet.dataSize >= 1) {
-        Serial.println(packet.data[0] ? "pressed" : "released");
+    } else {
+        bool pressed = false;
+        if (button.readPressed(packet, pressed)) Serial.println(pressed ? "pressed" : "released");
     }
 }
 
@@ -32,7 +33,7 @@ void loop() {
     Jacdac.process();
     static uint32_t nextQuery;
     if (button.connected() && static_cast<int32_t>(millis() - nextQuery) >= 0) {
-        button.requestPressed();
+        button.requestPressure();
         nextQuery = millis() + 500;
     }
 }

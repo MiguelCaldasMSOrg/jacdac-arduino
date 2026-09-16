@@ -70,6 +70,11 @@ static void testEventDecoding() {
 
     packet.flags = FRAME_FLAG_COMMAND;
     assert(!packet.isEvent());
+    packet.flags = 0;
+    packet.serviceIndex = SERVICE_INDEX_CRC_ACK;
+    assert(!packet.isEvent());
+    packet.serviceIndex = SERVICE_INDEX_PIPE;
+    assert(!packet.isEvent());
 }
 
 int main() {
