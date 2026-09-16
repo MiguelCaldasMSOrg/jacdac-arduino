@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="360" viewBox="0 0 1120 360" role="img" aria-labelledby="title description">
+  <title id="title">int16_t / i16</title>
+  <desc id="description">int16_t / i16. Signed 16-bit two's-complement integer; 2 bytes. Little-endian 16-bit storage layout.</desc>
+  <rect width="1120" height="360" fill="#f7faf9"/>
+  <text x="48" y="42" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="25" font-weight="700" fill="#172a3a" text-anchor="start">int16_t / i16</text>
+  <text x="48" y="70" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="15" font-weight="400" fill="#53656f" text-anchor="start">Signed 16-bit two's-complement integer; 2 bytes</text>
+  <text x="48" y="100" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="14" font-weight="600" fill="#172a3a" text-anchor="start">Logical value bits (most significant to least significant)</text>
+  <rect x="48" y="112" width="64" height="54" rx="4" fill="#d7664f" stroke="#9dafb2"/>
+  <text x="80" y="145" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">S</text>
+  <rect x="112" y="112" width="960" height="54" rx="4" fill="#277f75" stroke="#9dafb2"/>
+  <text x="592" y="145" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">value</text>
+  <text x="48" y="190" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="13" font-weight="400" fill="#53656f" text-anchor="start">S: sign weight -2^15   |   value: remaining weights</text>
+  <text x="48" y="220" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="14" font-weight="600" fill="#172a3a" text-anchor="start">Wire bytes (in increasing address/transmission order)</text>
+  <rect x="48" y="232" width="508" height="52" rx="4" fill="#457b9d" stroke="#9dafb2"/>
+  <text x="302" y="255" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">byte 0</text>
+  <text x="302" y="275" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="11" font-weight="400" fill="#ffffff" text-anchor="middle">bits 7..0</text>
+  <rect x="564" y="232" width="508" height="52" rx="4" fill="#ffffff" stroke="#9dafb2"/>
+  <text x="818" y="255" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="14" font-weight="700" fill="#172a3a" text-anchor="middle">byte 1</text>
+  <text x="818" y="275" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="11" font-weight="400" fill="#53656f" text-anchor="middle">bits 15..8</text>
+  <text x="48" y="310" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="14" font-weight="400" fill="#53656f" text-anchor="start">Little-endian: byte 0 carries the least-significant 8 bits. Signed values use two's complement.</text>
+  <text x="48" y="336" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="14" font-weight="600" fill="#172a3a" text-anchor="start">Range: -32,768 to 32,767</text>
+</svg>

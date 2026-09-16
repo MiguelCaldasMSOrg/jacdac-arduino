@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="242" viewBox="0 0 1120 242" role="img" aria-labelledby="title description">
+  <title id="title">Vibration sequence payload</title>
+  <desc id="description">A repeated two-byte tuple; no count byte is stored inside the payload</desc>
+  <rect width="1120" height="242" fill="#f7faf9"/>
+  <text x="48" y="42" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="25" font-weight="700" fill="#172a3a" text-anchor="start">Vibration sequence payload</text>
+  <text x="48" y="70" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="15" font-weight="400" fill="#53656f" text-anchor="start">A repeated two-byte tuple; no count byte is stored inside the payload</text>
+  <rect x="48" y="104" width="198.4" height="76" rx="4" fill="#457b9d" stroke="#9dafb2"/>
+  <text x="147.2" y="135" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">duration</text>
+  <text x="147.2" y="160" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="12" font-weight="400" fill="#ffffff" text-anchor="middle">u8 x 8 ms</text>
+  <rect x="254.4" y="104" width="198.4" height="76" rx="4" fill="#e9b949" stroke="#9dafb2"/>
+  <text x="353.6" y="135" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="16" font-weight="700" fill="#172a3a" text-anchor="middle">intensity</text>
+  <text x="353.6" y="160" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="12" font-weight="400" fill="#53656f" text-anchor="middle">u0.8</text>
+  <rect x="460.8" y="104" width="198.4" height="76" rx="4" fill="#457b9d" stroke="#9dafb2"/>
+  <text x="560" y="135" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">duration</text>
+  <text x="560" y="160" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="12" font-weight="400" fill="#ffffff" text-anchor="middle">u8 x 8 ms</text>
+  <rect x="667.2" y="104" width="198.4" height="76" rx="4" fill="#e9b949" stroke="#9dafb2"/>
+  <text x="766.4000000000001" y="135" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="16" font-weight="700" fill="#172a3a" text-anchor="middle">intensity</text>
+  <text x="766.4000000000001" y="160" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="12" font-weight="400" fill="#53656f" text-anchor="middle">u0.8</text>
+  <rect x="873.6" y="104" width="198.4" height="76" rx="4" fill="#dce5e3" stroke="#9dafb2"/>
+  <text x="972.8000000000001" y="135" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="16" font-weight="700" fill="#172a3a" text-anchor="middle">...</text>
+  <text x="972.8000000000001" y="160" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="12" font-weight="400" fill="#53656f" text-anchor="middle">repeat</text>
+  <text x="48" y="214" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="14" font-weight="600" fill="#172a3a" text-anchor="start">Payload length / 2 gives the number of steps. An empty sequence requests stop.</text>
+</svg>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="242" viewBox="0 0 1120 242" role="img" aria-labelledby="title description">
+  <title id="title">Variable byte buffer / bytes</title>
+  <desc id="description">Opaque payload bytes preserve order; the surrounding packet supplies the length</desc>
+  <rect width="1120" height="242" fill="#f7faf9"/>
+  <text x="48" y="42" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="25" font-weight="700" fill="#172a3a" text-anchor="start">Variable byte buffer / bytes</text>
+  <text x="48" y="70" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="15" font-weight="400" fill="#53656f" text-anchor="start">Opaque payload bytes preserve order; the surrounding packet supplies the length</text>
+  <rect x="48" y="104" width="250" height="76" rx="4" fill="#ffffff" stroke="#9dafb2"/>
+  <text x="173" y="135" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="16" font-weight="700" fill="#172a3a" text-anchor="middle">byte 0</text>
+  <text x="173" y="160" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="12" font-weight="400" fill="#53656f" text-anchor="middle">first</text>
+  <rect x="306" y="104" width="250" height="76" rx="4" fill="#ffffff" stroke="#9dafb2"/>
+  <text x="431" y="135" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="16" font-weight="700" fill="#172a3a" text-anchor="middle">byte 1</text>
+  <text x="431" y="160" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="12" font-weight="400" fill="#53656f" text-anchor="middle">second</text>
+  <rect x="564" y="104" width="250" height="76" rx="4" fill="#dce5e3" stroke="#9dafb2"/>
+  <text x="689" y="135" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="16" font-weight="700" fill="#172a3a" text-anchor="middle">...</text>
+  <text x="689" y="160" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="12" font-weight="400" fill="#53656f" text-anchor="middle">variable</text>
+  <rect x="822" y="104" width="250" height="76" rx="4" fill="#ffffff" stroke="#9dafb2"/>
+  <text x="947" y="135" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="16" font-weight="700" fill="#172a3a" text-anchor="middle">byte N-1</text>
+  <text x="947" y="160" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="12" font-weight="400" fill="#53656f" text-anchor="middle">last</text>
+  <text x="48" y="214" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="14" font-weight="600" fill="#172a3a" text-anchor="start">No pointer value is transmitted. The bytes referenced by the pointer are copied into the packet.</text>
+</svg>

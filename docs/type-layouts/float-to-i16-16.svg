@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="246" viewBox="0 0 1120 246" role="img" aria-labelledby="title description">
+  <title id="title">Float API input converted to signed i16.16 storage</title>
+  <desc id="description">A floating point angle is multiplied by 65536 and stored as a four-byte little-endian signed i16.16 integer.</desc>
+  <rect width="1120" height="246" fill="#f7faf9"/>
+  <text x="48" y="42" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="25" font-weight="700" fill="#172a3a" text-anchor="start">float API input to i16.16 wire value</text>
+  <text x="48" y="70" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="15" font-weight="400" fill="#53656f" text-anchor="start">ServoClient::setAngle() accepts float degrees, then converts before queueing</text>
+  <rect x="48" y="106" width="252" height="76" rx="4" fill="#ffffff" stroke="#9dafb2"/>
+  <text x="174" y="137" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="17" font-weight="700" fill="#172a3a" text-anchor="middle">float degrees</text>
+  <text x="174" y="162" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="13" font-weight="400" fill="#53656f" text-anchor="middle">API-only value</text>
+  <text x="335" y="151" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="17" font-weight="700" fill="#7a5c99" text-anchor="middle">x 65,536</text>
+  <text x="450" y="151" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="24" font-weight="700" fill="#53656f" text-anchor="middle">-&gt;</text>
+  <rect x="500" y="106" width="572" height="76" rx="4" fill="#d7664f" stroke="#9dafb2"/>
+  <text x="786" y="137" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="17" font-weight="700" fill="#ffffff" text-anchor="middle">int32_t i16.16</text>
+  <text x="786" y="162" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="13" font-weight="400" fill="#ffffff" text-anchor="middle">4 little-endian wire bytes</text>
+  <text x="48" y="218" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="14" font-weight="600" fill="#172a3a" text-anchor="start">The nRF target's float object is not transmitted. floatToQ16() truncates toward zero after scaling.</text>
+</svg>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="242" viewBox="0 0 1120 242" role="img" aria-labelledby="title description">
+  <title id="title">Boolean on the Jacdac wire</title>
+  <desc id="description">C++ bool arguments are encoded as one u8 byte by the typed client</desc>
+  <rect width="1120" height="242" fill="#f7faf9"/>
+  <text x="48" y="42" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="25" font-weight="700" fill="#172a3a" text-anchor="start">Boolean on the Jacdac wire</text>
+  <text x="48" y="70" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="15" font-weight="400" fill="#53656f" text-anchor="start">C++ bool arguments are encoded as one u8 byte by the typed client</text>
+  <rect x="48" y="104" width="1024" height="76" rx="4" fill="#277f75" stroke="#9dafb2"/>
+  <text x="560" y="135" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">0x00 or 0x01</text>
+  <text x="560" y="160" font-family="'Cascadia Code', 'IBM Plex Mono', monospace" font-size="12" font-weight="400" fill="#ffffff" text-anchor="middle">byte 0</text>
+  <text x="48" y="214" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-size="14" font-weight="600" fill="#172a3a" text-anchor="start">0 means false; 1 means true. Do not memcpy a platform-native bool into a generic payload.</text>
+</svg>

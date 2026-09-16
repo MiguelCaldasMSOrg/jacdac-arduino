@@ -114,7 +114,7 @@ jobs:
           package_root="release/${package_name}"
           mkdir -p "${package_root}"
           cp library.properties keywords.txt LICENSE README.md API.md ARCHITECTURE.md "${package_root}/"
-          cp -R src examples "${package_root}/"
+          cp -R src examples docs "${package_root}/"
 
           archive="Jacdac-${version#v}.zip"
           (cd release && zip -r "../${archive}" "${package_name}")
