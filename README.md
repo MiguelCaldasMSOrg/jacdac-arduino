@@ -25,7 +25,7 @@ Use a compliant micro:bit-to-Jacdac adapter and a suitably rated power source wi
 
 ## Installation
 
-Install the named `Jacdac-X.Y.Z.zip` release asset through Arduino's **Sketch > Include Library > Add .ZIP Library**. After installation, the supported sketches appear under **File > Examples > Jacdac**. Start with `Discover` to inspect the bus, then use the example for a specific device or `HardwareValidation` for a combined bench test.
+Install the named `Jacdac-X.Y.Z.zip` release asset through Arduino's **Sketch > Include Library > Add .ZIP Library**. After installation, the supported sketches appear under **File > Examples > Jacdac**, grouped into `V1` and `V2`; V2 examples are further grouped into `Sensors`, `Actuators`, and `Others`. Start with `V2 > Others > Discover` to inspect the bus, then use the example for a specific device or `HardwareValidation` for a combined bench test.
 
 The Sandeep Mistry nRF5 core and SoftDevice **None** are required. Follow [API.md](API.md#installation-and-target-setup) for board setup, command-line builds, wiring, the first sketch, and resource ownership.
 
@@ -35,31 +35,31 @@ The library includes only the 15 peripheral service types physically verified on
 
 | Service | Client | Individual example | Bench | Evidence |
 | --- | --- | --- | --- | --- |
-| Button/keycap | `ButtonClient` | [KeycapButton](examples/KeycapButton/KeycapButton.ino) | pressure, events | Live |
-| Rotary encoder/button | `RotaryEncoderClient` | [RotaryButton](examples/RotaryButton/RotaryButton.ino) | position, clicker events | Live |
-| Slider | `PotentiometerClient` | [Slider](examples/Slider/Slider.ino) | position | Live |
-| Magnetic field | `MagneticFieldLevelClient` | [MagneticField](examples/MagneticField/MagneticField.ino) | strength, events | Live |
-| Light level | `LightLevelClient` | [LightLevel](examples/LightLevel/LightLevel.ino) | light reading | Live |
-| Accelerometer | `AccelerometerClient` | [Accelerometer](examples/Accelerometer/Accelerometer.ino) | XYZ in g | Live |
-| Ultrasonic/distance | `DistanceClient` | [Distance](examples/Distance/Distance.ino) | metres | Live |
-| Temperature | `TemperatureClient` | [Temperature](examples/Temperature/Temperature.ino) | Celsius | Live |
-| Humidity | `HumidityClient` | [Humidity](examples/Humidity/Humidity.ino) | %RH | Live |
-| LED ring/short display | `LedClient` | [RgbRing](examples/RgbRing/RgbRing.ino) | `t`: RGB + pixel readback | Live |
-| LED-strip controller | `LedStripClient` | [LedStrip](examples/LedStrip/LedStrip.ino) | `t`: RGB program | Live |
-| Servo | `ServoClient` | [Servo](examples/Servo/Servo.ino) | `t`: two channels, limits and readback | Live |
-| Relay | `RelayClient` | [Relay](examples/Relay/Relay.ino) | `t`: on/off + readback | Live |
-| Haptic/vibration | `VibrationMotorClient` | [Haptic](examples/Haptic/Haptic.ino) | `h`: finite pulses + ACK | Live |
-| Power provider | `PowerClient` | [Power](examples/Power/Power.ino) | read-only capabilities and status | Live, reads only |
+| Button/keycap | `ButtonClient` | [KeycapButton](examples/V2/Sensors/KeycapButton/KeycapButton.ino) | pressure, events | Live |
+| Rotary encoder/button | `RotaryEncoderClient` | [RotaryButton](examples/V2/Sensors/RotaryButton/RotaryButton.ino) | position, clicker events | Live |
+| Slider | `PotentiometerClient` | [Slider](examples/V2/Sensors/Slider/Slider.ino) | position | Live |
+| Magnetic field | `MagneticFieldLevelClient` | [MagneticField](examples/V2/Sensors/MagneticField/MagneticField.ino) | strength, events | Live |
+| Light level | `LightLevelClient` | [LightLevel](examples/V2/Sensors/LightLevel/LightLevel.ino) | light reading | Live |
+| Accelerometer | `AccelerometerClient` | [Accelerometer](examples/V2/Sensors/Accelerometer/Accelerometer.ino) | XYZ in g | Live |
+| Ultrasonic/distance | `DistanceClient` | [Distance](examples/V2/Sensors/Distance/Distance.ino) | metres | Live |
+| Temperature | `TemperatureClient` | [Temperature](examples/V2/Sensors/Temperature/Temperature.ino) | Celsius | Live |
+| Humidity | `HumidityClient` | [Humidity](examples/V2/Sensors/Humidity/Humidity.ino) | %RH | Live |
+| LED ring/short display | `LedClient` | [RgbRing](examples/V2/Actuators/RgbRing/RgbRing.ino) | `t`: RGB + pixel readback | Live |
+| LED-strip controller | `LedStripClient` | [LedStrip](examples/V2/Actuators/LedStrip/LedStrip.ino) | `t`: RGB program | Live |
+| Servo | `ServoClient` | [Servo](examples/V2/Actuators/Servo/Servo.ino) | `t`: two channels, limits and readback | Live |
+| Relay | `RelayClient` | [Relay](examples/V2/Actuators/Relay/Relay.ino) | `t`: on/off + readback | Live |
+| Haptic/vibration | `VibrationMotorClient` | [Haptic](examples/V2/Actuators/Haptic/Haptic.ino) | `h`: finite pulses + ACK | Live |
+| Power provider | `PowerClient` | [Power](examples/V2/Others/Power/Power.ino) | read-only capabilities and status | Live, reads only |
 
-Also available: [Discover](examples/Discover/Discover.ino), [ButtonEvents](examples/ButtonEvents/ButtonEvents.ino), [DeviceCountMatrixV2](examples/DeviceCountMatrixV2/DeviceCountMatrixV2.ino), [ProtocolFeatures](examples/ProtocolFeatures/ProtocolFeatures.ino), and the packaged [HardwareValidation](examples/HardwareValidation/HardwareValidation.ino) bench. V1 entry points are [MicrobitV1](examples/MicrobitV1/MicrobitV1.ino), [PeripheralKitV1](examples/PeripheralKitV1/PeripheralKitV1.ino), and [ProtocolFeaturesV1](examples/ProtocolFeaturesV1/ProtocolFeaturesV1.ino). PeripheralKitV1 is a combined demonstration that operates its LED-strip output automatically; use the individual opt-in actuator examples for initial checks.
+Also available: [Discover](examples/V2/Others/Discover/Discover.ino), [ButtonEvents](examples/V2/Sensors/ButtonEvents/ButtonEvents.ino), [DeviceCountMatrixV2](examples/V2/Others/DeviceCountMatrixV2/DeviceCountMatrixV2.ino), [ProtocolFeatures](examples/V2/Others/ProtocolFeatures/ProtocolFeatures.ino), and the packaged [HardwareValidation](examples/V2/Others/HardwareValidation/HardwareValidation.ino) bench. V1 entry points are [MicrobitV1](examples/V1/MicrobitV1/MicrobitV1.ino), [PeripheralKitV1](examples/V1/PeripheralKitV1/PeripheralKitV1.ino), and [ProtocolFeaturesV1](examples/V1/ProtocolFeaturesV1/ProtocolFeaturesV1.ino). PeripheralKitV1 is a combined demonstration that operates its LED-strip output automatically; use the individual opt-in actuator examples for initial checks.
 
 ## Hardware bench (V2)
 
-[HardwareValidation](examples/HardwareValidation/HardwareValidation.ino) is installed with the library and appears in the Arduino Examples menu. It polls every recognized service in the table, records input ranges and events, and tracks timeouts, unsupported registers, queue overflows, and disconnects. The sketch starts in read-only mode. Output tests require a serial command and never change power-provider settings. Register formats and probe limits are documented in [API.md](API.md).
+[HardwareValidation](examples/V2/Others/HardwareValidation/HardwareValidation.ino) is installed with the library and appears in the Arduino Examples menu. It polls every recognized service in the table, records input ranges and events, and tracks timeouts, unsupported registers, queue overflows, and disconnects. The sketch starts in read-only mode. Output tests require a serial command and never change power-provider settings. Register formats and probe limits are documented in [API.md](API.md).
 
 ```powershell
-arduino-cli compile --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none --library . --output-dir build\bench-v2 examples\HardwareValidation
-arduino-cli upload --port COM12 --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none --input-file build\bench-v2\HardwareValidation.ino.hex examples\HardwareValidation
+arduino-cli compile --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none --library . --output-dir build\bench-v2 examples\V2\Others\HardwareValidation
+arduino-cli upload --port COM12 --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none --input-file build\bench-v2\HardwareValidation.ino.hex examples\V2\Others\HardwareValidation
 ```
 
 Open the serial monitor at 115200 baud. The periodic summaries show current readings, observed ranges, request/reply totals, optional-register support, and bus diagnostics. The default mode only reads registers. Serial commands:

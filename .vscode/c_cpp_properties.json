@@ -3,7 +3,7 @@
     "configurations": [
         {
             "name": "Arduino",
-            "compilerPath": "C:\\Users\\MiguelC\\AppData\\Local\\Arduino15\\packages\\sandeepmistry\\tools\\gcc-arm-none-eabi\\5_2-2015q4\\bin\\arm-none-eabi-g++",
+            "compilerPath": "C:\\Projects\\Arduino\\Support\\data\\packages\\sandeepmistry\\tools\\gcc-arm-none-eabi\\5_2-2015q4\\bin\\arm-none-eabi-g++",
             "compilerArgs": [
                 "-mcpu=cortex-m4",
                 "-mthumb",
@@ -21,23 +21,23 @@
             ],
             "intelliSenseMode": "gcc-x64",
             "includePath": [
-                "C:\\Users\\MiguelC\\AppData\\Local\\Arduino15\\packages\\sandeepmistry\\hardware\\nRF5\\0.8.0\\cores\\nRF5\\SDK\\components\\toolchain\\",
-                "C:\\Users\\MiguelC\\AppData\\Local\\Arduino15\\packages\\sandeepmistry\\hardware\\nRF5\\0.8.0\\cores\\nRF5\\SDK\\components\\toolchain\\CMSIS\\Include",
-                "C:\\Users\\MiguelC\\AppData\\Local\\Arduino15\\packages\\sandeepmistry\\hardware\\nRF5\\0.8.0\\cores\\nRF5\\SDK\\components\\toolchain\\gcc\\",
-                "C:\\Users\\MiguelC\\AppData\\Local\\Arduino15\\packages\\sandeepmistry\\hardware\\nRF5\\0.8.0\\cores\\nRF5\\SDK\\components\\device\\",
-                "C:\\Users\\MiguelC\\AppData\\Local\\Arduino15\\packages\\sandeepmistry\\hardware\\nRF5\\0.8.0\\cores\\nRF5\\SDK\\components\\drivers_nrf\\delay\\",
-                "C:\\Users\\MiguelC\\AppData\\Local\\Arduino15\\packages\\sandeepmistry\\hardware\\nRF5\\0.8.0\\cores\\nRF5",
-                "C:\\Users\\MiguelC\\AppData\\Local\\Arduino15\\packages\\sandeepmistry\\hardware\\nRF5\\0.8.0\\variants\\BBCmicrobitV2",
-                "c:\\users\\miguelc\\appdata\\local\\arduino15\\packages\\sandeepmistry\\tools\\gcc-arm-none-eabi\\5_2-2015q4\\arm-none-eabi\\include\\c++\\5.2.1",
-                "c:\\users\\miguelc\\appdata\\local\\arduino15\\packages\\sandeepmistry\\tools\\gcc-arm-none-eabi\\5_2-2015q4\\arm-none-eabi\\include\\c++\\5.2.1\\arm-none-eabi",
-                "c:\\users\\miguelc\\appdata\\local\\arduino15\\packages\\sandeepmistry\\tools\\gcc-arm-none-eabi\\5_2-2015q4\\arm-none-eabi\\include\\c++\\5.2.1\\backward",
-                "c:\\users\\miguelc\\appdata\\local\\arduino15\\packages\\sandeepmistry\\tools\\gcc-arm-none-eabi\\5_2-2015q4\\lib\\gcc\\arm-none-eabi\\5.2.1\\include",
-                "c:\\users\\miguelc\\appdata\\local\\arduino15\\packages\\sandeepmistry\\tools\\gcc-arm-none-eabi\\5_2-2015q4\\lib\\gcc\\arm-none-eabi\\5.2.1\\include-fixed",
-                "c:\\users\\miguelc\\appdata\\local\\arduino15\\packages\\sandeepmistry\\tools\\gcc-arm-none-eabi\\5_2-2015q4\\arm-none-eabi\\include",
-                "${workspaceFolder}\\src"
+                "C:\\Projects\\Arduino\\Support\\data\\packages\\sandeepmistry\\hardware\\nRF5\\0.8.0\\cores\\nRF5\\SDK\\components\\toolchain\\",
+                "C:\\Projects\\Arduino\\Support\\data\\packages\\sandeepmistry\\hardware\\nRF5\\0.8.0\\cores\\nRF5\\SDK\\components\\toolchain\\CMSIS\\Include",
+                "C:\\Projects\\Arduino\\Support\\data\\packages\\sandeepmistry\\hardware\\nRF5\\0.8.0\\cores\\nRF5\\SDK\\components\\toolchain\\gcc\\",
+                "C:\\Projects\\Arduino\\Support\\data\\packages\\sandeepmistry\\hardware\\nRF5\\0.8.0\\cores\\nRF5\\SDK\\components\\device\\",
+                "C:\\Projects\\Arduino\\Support\\data\\packages\\sandeepmistry\\hardware\\nRF5\\0.8.0\\cores\\nRF5\\SDK\\components\\drivers_nrf\\delay\\",
+                "C:\\Projects\\Arduino\\Support\\data\\packages\\sandeepmistry\\hardware\\nRF5\\0.8.0\\cores\\nRF5",
+                "C:\\Projects\\Arduino\\Support\\data\\packages\\sandeepmistry\\hardware\\nRF5\\0.8.0\\variants\\BBCmicrobitV2",
+                "${workspaceFolder}\\src",
+                "C:\\Projects\\Arduino\\Support\\data\\packages\\sandeepmistry\\tools\\gcc-arm-none-eabi\\5_2-2015q4\\arm-none-eabi\\include\\c++\\5.2.1",
+                "C:\\Projects\\Arduino\\Support\\data\\packages\\sandeepmistry\\tools\\gcc-arm-none-eabi\\5_2-2015q4\\arm-none-eabi\\include\\c++\\5.2.1\\arm-none-eabi",
+                "C:\\Projects\\Arduino\\Support\\data\\packages\\sandeepmistry\\tools\\gcc-arm-none-eabi\\5_2-2015q4\\arm-none-eabi\\include\\c++\\5.2.1\\backward",
+                "C:\\Projects\\Arduino\\Support\\data\\packages\\sandeepmistry\\tools\\gcc-arm-none-eabi\\5_2-2015q4\\lib\\gcc\\arm-none-eabi\\5.2.1\\include",
+                "C:\\Projects\\Arduino\\Support\\data\\packages\\sandeepmistry\\tools\\gcc-arm-none-eabi\\5_2-2015q4\\lib\\gcc\\arm-none-eabi\\5.2.1\\include-fixed",
+                "C:\\Projects\\Arduino\\Support\\data\\packages\\sandeepmistry\\tools\\gcc-arm-none-eabi\\5_2-2015q4\\arm-none-eabi\\include"
             ],
             "forcedInclude": [
-                "C:\\Users\\MiguelC\\AppData\\Local\\Arduino15\\packages\\sandeepmistry\\hardware\\nRF5\\0.8.0\\cores\\nRF5\\Arduino.h"
+                "C:\\Projects\\Arduino\\Support\\data\\packages\\sandeepmistry\\hardware\\nRF5\\0.8.0\\cores\\nRF5\\Arduino.h"
             ],
             "cStandard": "c11",
             "cppStandard": "c++11",

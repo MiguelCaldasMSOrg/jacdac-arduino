@@ -42,8 +42,8 @@ The default data connection is micro:bit `P12` to `JD_DATA`, with common ground 
 V1 has only one hardware UART. Do not reference `Serial` in a V1 Jacdac sketch: doing so conflicts with the transport's UART0 handler. The individual serial examples and hardware bench target V2. V1-safe examples are `MicrobitV1`, `PeripheralKitV1`, and `ProtocolFeaturesV1`.
 
 ```powershell
-arduino-cli compile --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none --library . examples\Discover
-arduino-cli compile --fqbn sandeepmistry:nRF5:BBCmicrobit:softdevice=none --library . examples\MicrobitV1
+arduino-cli compile --fqbn sandeepmistry:nRF5:BBCmicrobitV2:softdevice=none --library . examples\V2\Others\Discover
+arduino-cli compile --fqbn sandeepmistry:nRF5:BBCmicrobit:softdevice=none --library . examples\V1\MicrobitV1
 ```
 
 ### First sketch
